@@ -56,8 +56,12 @@ def register():
     register_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsDefinition)
     register_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsViolation)
     register_class(operators.MESH_CONSTRAINTS_OT_Solve)
-    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
     register_class(operators.MESH_CONSTRAINTS_OT_DeleteConstraint)
+    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
+    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXCoord)
+    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixYCoord)
+    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixZCoord)
+    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord)
 
     # Panels
     register_class(panels.MeshConstraintsPanelMain)
@@ -77,8 +81,12 @@ def unregister():
     unregister_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsDefinition)
     unregister_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsViolation)
     unregister_class(operators.MESH_CONSTRAINTS_OT_Solve)
-    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
     unregister_class(operators.MESH_CONSTRAINTS_OT_DeleteConstraint)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXCoord)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixYCoord)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixZCoord)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord)
 
     # Properties
     unregister_class(props.MeshConstraintsContainer)

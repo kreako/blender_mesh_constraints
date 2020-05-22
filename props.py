@@ -62,11 +62,13 @@ class MeshConstraints:
         del self.mc.constraints[index]
 
     def exist_constraint(self, kind, **kwargs):
-        """Return true if a constraint already exists on the MeshConstraintsContainer
+        """Return index of the constraint if a constraint already exists on the MeshConstraintsContainer
+        with the same kind and parameters
+        Return None if no constraint found
         mc: MeshConstraintsContainer instance
         kind: Kind enum for the constraint kind
         kwargs: parameters of the constraint"""
-        for c in self.mc.constraints:
+        for index, c in enumerate(self.mc.constraints):
             c_kind = ConstraintsKind(c.kind)
             if c_kind == kind:
                 # This is the same type of constraint I'm looking for
@@ -79,7 +81,7 @@ class MeshConstraints:
                         c.point0 == point1 and c.point1 == point0
                     ):
                         # this is the one !
-                        return True
+                        return index
                 elif c_kind in (
                     ConstraintsKind.FIX_X_COORD,
                     ConstraintsKind.FIX_Y_COORD,
@@ -87,12 +89,12 @@ class MeshConstraints:
                 ):
                     point0 = kwargs["point0"]
                     if c.point0 == point0:
-                        return True
+                        return index
                 else:
                     raise PropsException(
                         f"Internal error : Unknown constraint : {c_kind}"
                     )
-        return False
+        return None
 
     def _add(self):
         """Internal utility to add a new constraint in MeshConstraintGenerator"""
