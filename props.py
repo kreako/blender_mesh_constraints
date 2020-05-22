@@ -55,8 +55,11 @@ class MeshConstraints:
     def __len__(self):
         return len(self.mc.constraints)
 
+    def __iter__(self):
+        yield from self.mc.constraints
+
     def remove(self, index):
-        self.mc.constraints.remove(index)
+        del self.mc.constraints[index]
 
     def exist_constraint(self, kind, **kwargs):
         """Return true if a constraint already exists on the MeshConstraintsContainer

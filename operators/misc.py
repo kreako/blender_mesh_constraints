@@ -3,7 +3,7 @@ from . import base
 
 
 class MESH_CONSTRAINTS_OT_DeleteConstraint(base.MeshConstraintsOperator):
-    bl_idname = "mesh_constraints.solve"
+    bl_idname = "mesh_constraints.delete_constraint"
     bl_label = "Delete"
     bl_description = "Delete a constraint based on its index"
 

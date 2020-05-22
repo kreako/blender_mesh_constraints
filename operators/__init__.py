@@ -5,6 +5,7 @@ from .draw import (
 )
 from .solve import MESH_CONSTRAINTS_OT_Solve
 from .constraints import MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices
+from .misc import MESH_CONSTRAINTS_OT_DeleteConstraint
 
 
 def reload():
@@ -22,4 +23,5 @@ __all__ = [
     "MESH_CONSTRAINTS_OT_DrawConstraintsViolation",
     "MESH_CONSTRAINTS_OT_Solve",
     "MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices",
+    "MESH_CONSTRAINTS_OT_DeleteConstraint",
 ]

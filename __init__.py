@@ -57,15 +57,20 @@ def register():
     register_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsViolation)
     register_class(operators.MESH_CONSTRAINTS_OT_Solve)
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
+    register_class(operators.MESH_CONSTRAINTS_OT_DeleteConstraint)
 
     # Panels
     register_class(panels.MeshConstraintsPanelMain)
+    register_class(panels.MeshConstraintsPanelAdd)
+    register_class(panels.MeshConstraintsPanelItems)
 
     print("register", props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES)
 
 
 def unregister():
     # Panels
+    unregister_class(panels.MeshConstraintsPanelAdd)
+    unregister_class(panels.MeshConstraintsPanelItems)
     unregister_class(panels.MeshConstraintsPanelMain)
 
     # Operators
@@ -73,6 +78,7 @@ def unregister():
     unregister_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsViolation)
     unregister_class(operators.MESH_CONSTRAINTS_OT_Solve)
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_DeleteConstraint)
 
     # Properties
     unregister_class(props.MeshConstraintsContainer)

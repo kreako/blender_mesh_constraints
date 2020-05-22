@@ -1,7 +1,7 @@
 from ..props import ConstraintsKind
 import pytest
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def mesh_constraints_data():
     class Properties:
         def __init__(self, **kwargs):
