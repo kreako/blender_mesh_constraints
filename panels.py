@@ -69,19 +69,36 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
 
         box = self.layout.box()
         for index, c in enumerate(mc):
+            # TODO do something with ValueError ?
+            c_kind = props.ConstraintsKind(c.kind)
+            c_abbreviation = props.constraints_kind_abbreviation[c_kind]
+            c_display = props.constraints_kind_display[c_kind]
+
             row = box.row(align=True)
             icon = "HIDE_OFF" if c.view else "HIDE_ON"
             row.prop(c, "view", text="", toggle=True, icon=icon)
             row.prop(c, "show_details", text="", toggle=True, icon="PREFERENCES")
+            row.label(text=c_abbreviation)
             row.prop(c, "value", text="")
             delete_op = "mesh_constraints.delete_constraint"
             row.operator(delete_op, text="", icon="X").index = index
             if c.show_details:
-                # TODO do something with ValueError ?
-                kind = props.ConstraintsKind(c.kind)
-                if kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
+                row = box.row(align=True)
+                row.label(text=c_display)
+                if c_kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
                     row = box.row(align=True)
                     row.prop(c, "point0", text="Point0")
                     row.prop(c, "point1", text="Point1")
+                    row = box.row(align=True)
+                    row.label(text="")
+                elif c_kind in (
+                    props.ConstraintsKind.FIX_X_COORD,
+                    props.ConstraintsKind.FIX_Y_COORD,
+                    props.ConstraintsKind.FIX_Z_COORD,
+                ):
+                    row = box.row(align=True)
+                    row.prop(c, "point0", text="Point0")
                 else:
-                    row.label(text=f"Not supported yet : {kind}")
+                    raise Exception(f"Not supported: {c_display}")
+                row = box.row(align=True)
+                row.label(text="")

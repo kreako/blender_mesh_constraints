@@ -19,15 +19,31 @@ class ConstraintsKind(Enum):
 
 
 # For kind EnumProperty
-kind_items = [
+constraints_kind_items = [
     (k.value, " ".join(s.lower() for s in k.name.split("_")), "")
     for k in ConstraintsKind
 ]
 
+# For full display
+constraints_kind_display = {
+    k: " ".join(s.lower() for s in k.name.split("_")) for k in ConstraintsKind
+}
+
+# For abbreviation display
+constraints_kind_abbreviation = {
+    ConstraintsKind.UNKNOWN: "?",
+    ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES: "D2",
+    ConstraintsKind.FIX_X_COORD: "FX",
+    ConstraintsKind.FIX_Y_COORD: "FY",
+    ConstraintsKind.FIX_Z_COORD: "FZ",
+}
+
 
 class MeshConstraintProperties(PropertyGroup):
     # Data of the constraint
-    kind: EnumProperty(items=kind_items, name="Kind", description="Kind of constraints")
+    kind: EnumProperty(
+        items=constraints_kind_items, name="Kind", description="Kind of constraints"
+    )
     point0: IntProperty(name="point0", description="Point 0 of the constraint")
     point1: IntProperty(name="point1", description="Point 1 of the constraint")
     value: FloatProperty(name="value", description="Value of the constraint")
