@@ -2,3 +2,4 @@ __pycache__
 addons
 .pytest_cache
 archive
+.*.swp
