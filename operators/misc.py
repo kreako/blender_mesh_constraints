@@ -12,9 +12,9 @@ class MESH_CONSTRAINTS_OT_DeleteConstraint(base.MeshConstraintsOperator):
     def execute(self, context):
         if context.area.type != "VIEW_3D":
             return self.warning("I'm not able to find VIEW_3D, so I won't run")
-
         o = context.object
-
+        if o is None:
+            return self.warning(f"No object found")
         if "MeshConstraintGenerator" not in o:
             return self.warning(f"No constraints found on this object {o.name}")
 
