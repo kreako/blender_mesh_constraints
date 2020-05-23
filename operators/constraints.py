@@ -177,6 +177,8 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXYCoord(ConstraintOperator):
 
         point = vertices_list[0]
 
+        # TODO on Fix...Coord operator, merge existing coordinate for the same point
+        # Like : Existing FIX_X_COORD constraint, add a FIX_XY_COORD, merge them both in the latest
         k = props.ConstraintsKind.FIX_XY_COORD
         if self.mc.exist_constraint(k, point=point) is not None:
             return self.warning("This constraint already exists...")
