@@ -17,7 +17,7 @@ class ConstraintOperator(base.MeshConstraintsOperator):
             return self.warning("I'm not able to find VIEW_3D, so I won't run")
 
         # object accessor
-        self.o = context.object
+        self.o = context.edit_object
 
         # Build the mesh
         self.bm = bmesh.from_edit_mesh(self.o.data)
