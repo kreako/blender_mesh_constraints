@@ -23,6 +23,9 @@ from .constraints import (
     MESH_CONSTRAINTS_OT_ConstraintFixXCoord,
     MESH_CONSTRAINTS_OT_ConstraintFixYCoord,
     MESH_CONSTRAINTS_OT_ConstraintFixZCoord,
+    MESH_CONSTRAINTS_OT_ConstraintFixXYCoord,
+    MESH_CONSTRAINTS_OT_ConstraintFixXZCoord,
+    MESH_CONSTRAINTS_OT_ConstraintFixYZCoord,
     MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord,
 )
 from .misc import MESH_CONSTRAINTS_OT_DeleteConstraint
@@ -47,5 +50,8 @@ __all__ = [
     "MESH_CONSTRAINTS_OT_ConstraintFixXCoord",
     "MESH_CONSTRAINTS_OT_ConstraintFixYCoord",
     "MESH_CONSTRAINTS_OT_ConstraintFixZCoord",
+    "MESH_CONSTRAINTS_OT_ConstraintFixXYCoord",
+    "MESH_CONSTRAINTS_OT_ConstraintFixXZCoord",
+    "MESH_CONSTRAINTS_OT_ConstraintFixYZCoord",
     "MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord",
 ]

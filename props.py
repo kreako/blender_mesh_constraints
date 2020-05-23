@@ -4,6 +4,7 @@ from bpy.props import (
     CollectionProperty,
     EnumProperty,
     IntProperty,
+    FloatVectorProperty,
     FloatProperty,
     BoolProperty,
 )
@@ -16,6 +17,10 @@ class ConstraintsKind(Enum):
     FIX_X_COORD = "2"
     FIX_Y_COORD = "3"
     FIX_Z_COORD = "4"
+    FIX_XY_COORD = "5"
+    FIX_YZ_COORD = "6"
+    FIX_XZ_COORD = "7"
+    FIX_XYZ_COORD = "8"
 
 
 # For kind EnumProperty
@@ -36,6 +41,10 @@ constraints_kind_abbreviation = {
     ConstraintsKind.FIX_X_COORD: "FX",
     ConstraintsKind.FIX_Y_COORD: "FY",
     ConstraintsKind.FIX_Z_COORD: "FZ",
+    ConstraintsKind.FIX_XY_COORD: "FXY",
+    ConstraintsKind.FIX_YZ_COORD: "FYZ",
+    ConstraintsKind.FIX_XZ_COORD: "FXZ",
+    ConstraintsKind.FIX_XYZ_COORD: "FXYZ",
 }
 
 
@@ -46,7 +55,9 @@ class MeshConstraintProperties(PropertyGroup):
     )
     point0: IntProperty(name="point0", description="Point 0 of the constraint")
     point1: IntProperty(name="point1", description="Point 1 of the constraint")
-    value: FloatProperty(name="value", description="Value of the constraint")
+    value0: FloatProperty(name="value0", description="Value 0 of the constraint")
+    value1: FloatProperty(name="value1", description="Value 1 of the constraint")
+    value2: FloatProperty(name="value2", description="Value 2 of the constraint")
     # View related
     view: BoolProperty(name="view", description="Show/hide in 3D view", default=True)
     show_details: BoolProperty(
@@ -62,6 +73,57 @@ class PropsException(Exception):
     pass
 
 
+class Constraint:
+    def __init__(self, constraint_properties):
+        self.kind = ConstraintsKind(constraint_properties.kind)
+        self.data = {
+            "view": constraint_properties.view,
+            "show_details": constraint_properties.show_details,
+        }
+        # Nb of values used by the constraint, default to 1 - the most common
+        self.nb_values = 1
+        self.raw = constraint_properties
+        if self.kind == ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.data["distance"] = constraint_properties.value0
+        elif self.kind == ConstraintsKind.FIX_X_COORD:
+            self.data["point"] = constraint_properties.point0
+            self.data["x"] = constraint_properties.value0
+        elif self.kind == ConstraintsKind.FIX_Y_COORD:
+            self.data["point"] = constraint_properties.point0
+            self.data["y"] = constraint_properties.value0
+        elif self.kind == ConstraintsKind.FIX_Z_COORD:
+            self.data["point"] = constraint_properties.point0
+            self.data["z"] = constraint_properties.value0
+        elif self.kind == ConstraintsKind.FIX_XY_COORD:
+            self.data["point"] = constraint_properties.point0
+            self.data["x"] = constraint_properties.value0
+            self.data["y"] = constraint_properties.value1
+            self.nb_values = 2
+        elif self.kind == ConstraintsKind.FIX_XZ_COORD:
+            self.data["point"] = constraint_properties.point0
+            self.data["x"] = constraint_properties.value0
+            self.data["z"] = constraint_properties.value1
+            self.nb_values = 2
+        elif self.kind == ConstraintsKind.FIX_YZ_COORD:
+            self.data["point"] = constraint_properties.point0
+            self.data["y"] = constraint_properties.value0
+            self.data["z"] = constraint_properties.value1
+            self.nb_values = 2
+        elif self.kind == ConstraintsKind.FIX_XYZ_COORD:
+            self.data["point"] = constraint_properties.point0
+            self.data["x"] = constraint_properties.value0
+            self.data["y"] = constraint_properties.value1
+            self.data["z"] = constraint_properties.value2
+            self.nb_values = 3
+        else:
+            raise Exception(f"Unknown kind of constraints {self.kind}")
+
+    def __getattr__(self, attr):
+        return self.data[attr]
+
+
 class MeshConstraints:
     """Utilities around MeshConstraintsContainer datas"""
 
@@ -72,10 +134,14 @@ class MeshConstraints:
         return len(self.mc.constraints)
 
     def __iter__(self):
-        yield from self.mc.constraints
+        for c in self.mc.constraints:
+            yield Constraint(c)
+
+    def __getitem__(self, key):
+        return Constraint(self.mc.constraints[key])
 
     def remove(self, index):
-        del self.mc.constraints[index]
+        self.mc.constraints.remove(index)
 
     def exist_constraint(self, kind, **kwargs):
         """Return index of the constraint if a constraint already exists on the MeshConstraintsContainer
@@ -102,9 +168,13 @@ class MeshConstraints:
                     ConstraintsKind.FIX_X_COORD,
                     ConstraintsKind.FIX_Y_COORD,
                     ConstraintsKind.FIX_Z_COORD,
+                    ConstraintsKind.FIX_XY_COORD,
+                    ConstraintsKind.FIX_XZ_COORD,
+                    ConstraintsKind.FIX_YZ_COORD,
+                    ConstraintsKind.FIX_XYZ_COORD,
                 ):
-                    point0 = kwargs["point0"]
-                    if c.point0 == point0:
+                    point = kwargs["point"]
+                    if c.point0 == point:
                         return index
                 else:
                     raise PropsException(
@@ -126,40 +196,86 @@ class MeshConstraints:
         # The constraint that has been created for me
         return self.mc.constraints[last]
 
-    def add_distance_between_2_vertices(self, point0, point1, value):
+    def add_distance_between_2_vertices(self, point0, point1, distance):
         """Add a ConstraintsKind::DISTANCE_BETWEEN_2_VERTICES with parameters
         point0: vertex index of point0
         point1: vertex index of point1
-        value: distance"""
+        distance: distance"""
         c = self._add()
         c.kind = ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES.value
         c.point0 = point0
         c.point1 = point1
-        c.value = value
+        c.value0 = distance
 
-    def add_fix_x_coord(self, point0, value):
+    def add_fix_x_coord(self, point0, x):
         """Add a ConstraintsKind::FIX_X_COORD with parameters
         point0: vertex index of point0
-        value: coordinate"""
+        x: coordinate"""
         c = self._add()
         c.kind = ConstraintsKind.FIX_X_COORD.value
         c.point0 = point0
-        c.value = value
+        c.value0 = x
 
-    def add_fix_y_coord(self, point0, value):
+    def add_fix_y_coord(self, point0, y):
         """Add a ConstraintsKind::FIX_Y_COORD with parameters
         point0: vertex index of point0
-        value: coordinate"""
+        y: coordinate"""
         c = self._add()
         c.kind = ConstraintsKind.FIX_Y_COORD.value
         c.point0 = point0
-        c.value = value
+        c.value0 = y
 
-    def add_fix_z_coord(self, point0, value):
+    def add_fix_z_coord(self, point0, z):
         """Add a ConstraintsKind::FIX_Z_COORD with parameters
         point0: vertex index of point0
-        value: coordinate"""
+        z: coordinate"""
         c = self._add()
         c.kind = ConstraintsKind.FIX_Z_COORD.value
         c.point0 = point0
-        c.value = value
+        c.value0 = z
+
+    def add_fix_xy_coord(self, point0, x, y):
+        """Add a ConstraintsKind::FIX_XY_COORD with parameters
+        point0: vertex index of point0
+        x: coordinate
+        y: coordinate"""
+        c = self._add()
+        c.kind = ConstraintsKind.FIX_XY_COORD.value
+        c.point0 = point0
+        c.value0 = x
+        c.value1 = y
+
+    def add_fix_xz_coord(self, point0, x, z):
+        """Add a ConstraintsKind::FIX_XZ_COORD with parameters
+        point0: vertex index of point0
+        x: coordinate
+        z: coordinate"""
+        c = self._add()
+        c.kind = ConstraintsKind.FIX_XZ_COORD.value
+        c.point0 = point0
+        c.value0 = x
+        c.value1 = z
+
+    def add_fix_yz_coord(self, point0, y, z):
+        """Add a ConstraintsKind::FIX_YZ_COORD with parameters
+        point0: vertex index of point0
+        y: coordinate
+        z: coordinate"""
+        c = self._add()
+        c.kind = ConstraintsKind.FIX_YZ_COORD.value
+        c.point0 = point0
+        c.value0 = y
+        c.value1 = z
+
+    def add_fix_xyz_coord(self, point0, x, y, z):
+        """Add a ConstraintsKind::FIX_XYZ_COORD with parameters
+        point0: vertex index of point0
+        x: coordinate
+        y: coordinate
+        z: coordinate"""
+        c = self._add()
+        c.kind = ConstraintsKind.FIX_XYZ_COORD.value
+        c.point0 = point0
+        c.value0 = x
+        c.value1 = y
+        c.value2 = z

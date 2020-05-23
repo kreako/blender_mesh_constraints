@@ -16,3 +16,7 @@ def IntProperty(*ags, **kwargs):
 
 def FloatProperty(*ags, **kwargs):
     pass
+
+
+def FloatVectorProperty(*ags, **kwargs):
+    pass

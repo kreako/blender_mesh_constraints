@@ -1,5 +1,6 @@
 from bpy.props import IntProperty
 from . import base
+from .. import props
 
 
 class MESH_CONSTRAINTS_OT_DeleteConstraint(base.MeshConstraintsOperator):

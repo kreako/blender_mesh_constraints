@@ -94,14 +94,13 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXCoord(ConstraintOperator):
                 "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
             )
 
-        point0 = vertices_list[0]
+        point = vertices_list[0]
 
         k = props.ConstraintsKind.FIX_X_COORD
-        if self.mc.exist_constraint(k, point0=point0) is not None:
+        if self.mc.exist_constraint(k, point=point) is not None:
             return self.warning("This constraint already exists...")
 
-        value = self.bm.verts[point0].co.x
-        self.mc.add_fix_x_coord(point0, value)
+        self.mc.add_fix_x_coord(point, self.bm.verts[point].co.x)
 
         return {"FINISHED"}
 
@@ -122,14 +121,13 @@ class MESH_CONSTRAINTS_OT_ConstraintFixYCoord(ConstraintOperator):
                 "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
             )
 
-        point0 = vertices_list[0]
+        point = vertices_list[0]
 
         k = props.ConstraintsKind.FIX_Y_COORD
-        if self.mc.exist_constraint(k, point0=point0) is not None:
+        if self.mc.exist_constraint(k, point=point) is not None:
             return self.warning("This constraint already exists...")
 
-        value = self.bm.verts[point0].co.y
-        self.mc.add_fix_y_coord(point0, value)
+        self.mc.add_fix_y_coord(point, self.bm.verts[point].co.y)
 
         return {"FINISHED"}
 
@@ -150,23 +148,22 @@ class MESH_CONSTRAINTS_OT_ConstraintFixZCoord(ConstraintOperator):
                 "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
             )
 
-        point0 = vertices_list[0]
+        point = vertices_list[0]
 
         k = props.ConstraintsKind.FIX_Z_COORD
-        if self.mc.exist_constraint(k, point0=point0) is not None:
+        if self.mc.exist_constraint(k, point=point) is not None:
             return self.warning("This constraint already exists...")
 
-        value = self.bm.verts[point0].co.z
-        self.mc.add_fix_z_coord(point0, value)
+        self.mc.add_fix_z_coord(point, self.bm.verts[point].co.z)
 
         return {"FINISHED"}
 
 
-class MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord(ConstraintOperator):
-    bl_idname = "mesh_constraints.constraint_fix_xyz_coord"
-    bl_label = "Add fix X, Y and Z coordinate constraints"
+class MESH_CONSTRAINTS_OT_ConstraintFixXYCoord(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_fix_xy_coord"
+    bl_label = "Add fix X and Y coordinates constraints"
     bl_description = (
-        "Add constraints to fix X, Y and Z coordinate (select 1 vertex) (EDITMODE only)"
+        "Add constraints to fix X and Y coordinates (select 1 vertex) (EDITMODE only)"
     )
 
     def constraint_execute(self, context):
@@ -178,26 +175,93 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord(ConstraintOperator):
                 "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
             )
 
-        point0 = vertices_list[0]
-        point = self.bm.verts[point0].co
+        point = vertices_list[0]
 
-        added = 0
+        k = props.ConstraintsKind.FIX_XY_COORD
+        if self.mc.exist_constraint(k, point=point) is not None:
+            return self.warning("This constraint already exists...")
 
-        k = props.ConstraintsKind.FIX_X_COORD
-        if self.mc.exist_constraint(k, point0=point0) is None:
-            self.mc.add_fix_x_coord(point0, point.x)
-            added += 1
+        self.mc.add_fix_xy_coord(point, *self.bm.verts[point].co.xy)
 
-        k = props.ConstraintsKind.FIX_Y_COORD
-        if self.mc.exist_constraint(k, point0=point0) is None:
-            self.mc.add_fix_y_coord(point0, point.y)
-            added += 1
+        return {"FINISHED"}
 
-        k = props.ConstraintsKind.FIX_Z_COORD
-        if self.mc.exist_constraint(k, point0=point0) is None:
-            self.mc.add_fix_z_coord(point0, point.z)
-            added += 1
 
-        self.info(f"Added {added} constraints")
+class MESH_CONSTRAINTS_OT_ConstraintFixXZCoord(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_fix_xz_coord"
+    bl_label = "Add fix X and Z coordinates constraints"
+    bl_description = (
+        "Add constraints to fix X and Z coordinates (select 1 vertex) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        vertices_list = self.selected_verts()
+
+        if len(vertices_list) != 1:
+            # TODO: add multiple constraints at once
+            return self.warning(
+                "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
+            )
+
+        point = vertices_list[0]
+
+        k = props.ConstraintsKind.FIX_XZ_COORD
+        if self.mc.exist_constraint(k, point=point) is not None:
+            return self.warning("This constraint already exists...")
+
+        self.mc.add_fix_xz_coord(point, *self.bm.verts[point].co.xz)
+
+        return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_ConstraintFixYZCoord(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_fix_yz_coord"
+    bl_label = "Add fix Y and Z coordinates constraints"
+    bl_description = (
+        "Add constraints to fix Y and Z coordinates (select 1 vertex) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        vertices_list = self.selected_verts()
+
+        if len(vertices_list) != 1:
+            # TODO: add multiple constraints at once
+            return self.warning(
+                "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
+            )
+
+        point = vertices_list[0]
+
+        k = props.ConstraintsKind.FIX_YZ_COORD
+        if self.mc.exist_constraint(k, point=point) is not None:
+            return self.warning("This constraint already exists...")
+
+        self.mc.add_fix_yz_coord(point, *self.bm.verts[point].co.yz)
+
+        return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_fix_xyz_coord"
+    bl_label = "Add fix X, Y and Z coordinates constraints"
+    bl_description = (
+        "Add constraints to fix X, Y and Z coordinates (select 1 vertex) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        vertices_list = self.selected_verts()
+
+        if len(vertices_list) != 1:
+            # TODO: add multiple constraints at once
+            return self.warning(
+                "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
+            )
+
+        point = vertices_list[0]
+
+        k = props.ConstraintsKind.FIX_XYZ_COORD
+        if self.mc.exist_constraint(k, point=point) is not None:
+            return self.warning("This constraint already exists...")
+
+        self.mc.add_fix_xyz_coord(point, *self.bm.verts[point].co.xyz)
 
         return {"FINISHED"}

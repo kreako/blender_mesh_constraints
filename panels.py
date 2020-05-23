@@ -52,6 +52,10 @@ class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
         row.operator("mesh_constraints.constraint_fix_x_coord", text="X")
         row.operator("mesh_constraints.constraint_fix_y_coord", text="Y")
         row.operator("mesh_constraints.constraint_fix_z_coord", text="Z")
+        row = box.row()
+        row.operator("mesh_constraints.constraint_fix_xy_coord", text="XY")
+        row.operator("mesh_constraints.constraint_fix_xz_coord", text="XZ")
+        row.operator("mesh_constraints.constraint_fix_yz_coord", text="YZ")
 
 
 class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
@@ -76,19 +80,24 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
 
             row = box.row(align=True)
             icon = "HIDE_OFF" if c.view else "HIDE_ON"
-            row.prop(c, "view", text="", toggle=True, icon=icon)
-            row.prop(c, "show_details", text="", toggle=True, icon="PREFERENCES")
+            row.prop(c.raw, "view", text="", toggle=True, icon=icon)
+            row.prop(c.raw, "show_details", text="", toggle=True, icon="PREFERENCES")
             row.label(text=c_abbreviation)
-            row.prop(c, "value", text="")
+            row.prop(c.raw, "value0", text="")
+            if c.nb_values > 1:
+                row.prop(c.raw, "value1", text="")
+            if c.nb_values > 2:
+                row.prop(c.raw, "value2", text="")
             delete_op = "mesh_constraints.delete_constraint"
+
             row.operator(delete_op, text="", icon="X").index = index
             if c.show_details:
                 row = box.row(align=True)
                 row.label(text=c_display)
                 if c_kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
                     row = box.row(align=True)
-                    row.prop(c, "point0", text="Point0")
-                    row.prop(c, "point1", text="Point1")
+                    row.prop(c.raw, "point0", text="Point0")
+                    row.prop(c.raw, "point1", text="Point1")
                     row = box.row(align=True)
                     row.label(text="")
                 elif c_kind in (
@@ -97,7 +106,7 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                     props.ConstraintsKind.FIX_Z_COORD,
                 ):
                     row = box.row(align=True)
-                    row.prop(c, "point0", text="Point0")
+                    row.prop(c.raw, "point0", text="Point")
                 else:
                     raise Exception(f"Not supported: {c_display}")
                 row = box.row(align=True)
