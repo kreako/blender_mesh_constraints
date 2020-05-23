@@ -1,7 +1,7 @@
 import gpu
 from gpu_extras.batch import batch_for_shader
 from bpy.types import WindowManager
-from bpy_extras import view3d_utils
+from bpy_extras.view3d_utils import location_3d_to_region_2d
 import bmesh
 from mathutils import Vector
 import blf
@@ -41,7 +41,7 @@ def draw_constraints_definition(context):
         if c_kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
             point0 = bm.verts[c.point0].co
             point1 = bm.verts[c.point1].co
-            _distance_between_2_vertices(context, point0, point1)
+            _distance_between_2_vertices(context, point0, point1, c.distance)
         elif c_kind == props.ConstraintsKind.FIX_X_COORD:
             point = bm.verts[c.point].co
             _fix_xyz_coord(context, point, "x")
@@ -104,9 +104,62 @@ def draw_red_bounds(context):
     batch.draw(shader)
 
 
-def _distance_between_2_vertices(context, point0_3d, point1_3d):
+def _distance_between_2_vertices(context, p0_3d, p1_3d, distance):
     """Draw the constraint DISTANCE_BETWEEN_2_VERTICES"""
-    pass
+    region = context.region
+    rv3d = context.space_data.region_3d
+    o = context.edit_object
+
+    p0_2d = location_3d_to_region_2d(region, rv3d, p0_3d)
+    p1_2d = location_3d_to_region_2d(region, rv3d, p1_3d)
+    if p0_2d is None or p1_2d is None:
+        # not in view
+        # TODO should I do something when one of the points is in view ?
+        return
+
+    v_3d = p1_3d - p0_3d
+    v_2d = p1_2d - p0_2d
+    # normal vector to v_3d pointing to outside of the object
+    # already normalized multiply to 1/10 of v_3d length so it hopefully
+    # stays in view
+    vn_3d = _normal_vector(o, p0_3d, p1_3d) * v_3d.length / 10
+
+    # Projected point on normal vector from p0_3d
+    p0_n_2d = location_3d_to_region_2d(region, rv3d, p0_3d + vn_3d)
+    if p0_n_2d is None:
+        # Not in view
+        return
+    # Now the point on (p0_2d - p0_n_2d) vector so (p0_n0_2d - p0_2d).length == EDGE_CONSTRAINT_SPACING
+    p0_n0_2d = p0_2d.lerp(p0_n_2d, EDGE_CONSTRAINT_SPACING / (p0_n_2d - p0_2d).length)
+    # Same story with EDGE_CONSTRAINT_SPACING * 1.3
+    p0_n1_2d = p0_2d.lerp(p0_n_2d, EDGE_CONSTRAINT_SPACING * 1.3 / (p0_n_2d - p0_2d).length)
+
+    # Keep p0_n0_2d - p1_n0_2d parallel to p0_2d - p1_2d
+    p1_n0_2d = p0_n0_2d + v_2d
+    # Same
+    p1_n1_2d = p0_n1_2d + v_2d
+
+    # Now text drawing
+    txt = _format_distance(context, distance)
+    font_id = 0
+    width, height = blf.dimensions(font_id, txt)
+    p_n0_middle = p0_n0_2d.lerp(p1_n0_2d, 0.5)
+    blf.position(font_id, p_n0_middle[0] - width / 2, p_n0_middle[1] - height / 2, 0)
+    blf.size(font_id, FONT_SIZE, 72)
+    blf.color(font_id, *COLOR_TEAL_400)
+    blf.draw(font_id, txt)
+
+    # Draw the lines
+    # TODO cut the line on the text box
+    vertices = [p0_2d, p1_2d, p0_n0_2d, p1_n0_2d, p0_n1_2d, p1_n1_2d]
+    indices = ((0, 4), (1, 5), (2, 3))
+    shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+    batch = batch_for_shader(shader, 'LINES', {"pos": vertices}, indices=indices)
+
+    shader.bind()
+    shader.uniform_float("color", COLOR_TEAL_400)
+    batch.draw(shader)
+
 
 
 def _fix_xyz_coord(context, point_3d, label):
@@ -116,7 +169,7 @@ def _fix_xyz_coord(context, point_3d, label):
     o = context.edit_object
 
     world_point_3d = _world_point(o, point_3d)
-    world_point_2d = view3d_utils.location_3d_to_region_2d(region, rv3d, point_3d)
+    world_point_2d = location_3d_to_region_2d(region, rv3d, point_3d)
 
     if world_point_2d is None:
         # Not in view
@@ -132,13 +185,15 @@ def _fix_xyz_coord(context, point_3d, label):
     batch = batch_for_shader(shader, 'LINES', {"pos": vertices}, indices=indices)
 
     shader.bind()
+    # TODO color for violation ?
+    # Or leave it to draw violation thing ?
     shader.uniform_float("color", COLOR_TEAL_400)
     batch.draw(shader)
 
     # Now the label
     font_id = 0
     blf.position(font_id, world_point_2d[0] + 1.5 * VERTEX_BOX_MARGIN, world_point_2d[1] - VERTEX_BOX_MARGIN, 0)
-    blf.size(font_id, 15, 72)
+    blf.size(font_id, FONT_SIZE, 72)
     blf.color(font_id, *COLOR_TEAL_400)
     blf.draw(font_id, label)
 
@@ -152,12 +207,12 @@ def _world_point(o, point_3d):
     return v.to_3d()
 
 
-def _normal_vector(o, point0_3d, point1_3d):
+def _normal_vector(o, p0_3d, p1_3d):
     """Return the normal vector (pointing outside) to an object
     and a pair of vertices"""
     # The vector between middle point of v1-v2 and object center location
     # is the normal vector I'm looking for
-    vn = v1.lerp(v2, 0.5) - o.matrix_world.translation
+    vn = p0_3d.lerp(p1_3d, 0.5) - o.matrix_world.translation
     # normalize so I can to length computation on it
     vn.normalize()
     return vn
@@ -167,6 +222,29 @@ def _from_hex_rgb(r, g, b):
     return list(map(lambda x: x / 0xFF, (r, g, b, 0xFF)))
 
 
+def _format_distance(context, distance):
+    unit_system = context.scene.unit_settings.system
+    if unit_system == "METRIC":
+        r = round(distance, 2)
+        if r >= 1.0:
+            return f"{distance:.2f} m"
+        elif r >= 0.1:
+            return f"{distance:.2f} m"
+        elif r >= 0.01:
+            return f"{distance * 100:.2f} cm"
+        else:
+            return f"{distance * 1000:.2f} mm"
+    elif unit_system == "IMPERIAL":
+        feet = distance * 3.2808399
+        if round(feet, 2) >= 1.0:
+            return f"{feet:.2f} ft"
+        else:
+            inches = distance * 39.3700787
+            return f"{inches:.2f} in"
+    else:
+        return f"{distance}"
+
+
 def draw_constraints_violation(context):
     pass
 
@@ -174,5 +252,9 @@ def draw_constraints_violation(context):
 # TODO move all of this in preferences of the addon
 
 VERTEX_BOX_MARGIN = 4
+# Spacing between edge and constraint drawing in px
+EDGE_CONSTRAINT_SPACING = 10
 
 COLOR_TEAL_400 = _from_hex_rgb(0x4F, 0xD1, 0xC5)
+
+FONT_SIZE = 15
