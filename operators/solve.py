@@ -33,6 +33,7 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
         ConstraintsKind = props.ConstraintsKind
 
         # TODO progress bar
+        # WindowManager progress_begin
 
         s = solver.Solver()
         for index, c in enumerate(mc):
