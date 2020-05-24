@@ -31,6 +31,7 @@ from . import props
 from . import drawing
 from . import operators
 from . import panels
+from . import solver
 
 if reload:
     # When using script.reload in blender
@@ -41,6 +42,7 @@ if reload:
     importlib.reload(operators)
     operators.reload()
     importlib.reload(panels)
+    importlib.reload(solver)
 
 
 def register():

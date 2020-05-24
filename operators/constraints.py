@@ -1,4 +1,3 @@
-import bpy
 import bmesh
 
 from . import base
@@ -10,7 +9,7 @@ class ConstraintOperator(base.MeshConstraintsOperator):
     def poll(cls, context):
         # A selected mesh in edit mode : I'm in, but not for the rest
         o = context.object
-        return o is not None and o.type == "MESH" and bpy.context.mode == "EDIT_MESH"
+        return o is not None and o.type == "MESH" and context.mode == "EDIT_MESH"
 
     def execute(self, context):
         if context.area.type != "VIEW_3D":
