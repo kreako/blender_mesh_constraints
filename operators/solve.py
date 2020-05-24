@@ -28,6 +28,8 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
         bm = bmesh.from_edit_mesh(mesh)
         mc = props.MeshConstraints(o.MeshConstraintGenerator)
 
+        mc.clear_in_errors()
+
         ConstraintsKind = props.ConstraintsKind
 
         s = solver.Solver()
@@ -72,5 +74,8 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
             self.info("Solved !")
             return {"FINISHED"}
         else:
-            # TODO error reporting to be improved
-            return self.warning("Not Solved :(")
+            print(solution)
+            nb_in_errors = len(solution["equations_in_error"])
+            for in_error in solution["equations_in_error"]:
+                mc.set_in_error(in_error)
+            return self.error(f"Not Solved : Constraints did not converged, {nb_in_errors} conflicting...")

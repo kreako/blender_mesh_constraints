@@ -65,7 +65,7 @@ def test_solver_unsolvable():
     assert ret["not_convergent"] == False
     assert ret["overflow_count"] == True
     assert ret["singular_matrix"] == False
-    assert ret["equations_in_error"] == [42]
+    assert ret["equations_in_error"] == {42}
 
 
 def test_solver_low_rank():
@@ -79,4 +79,4 @@ def test_solver_low_rank():
     assert ret["not_convergent"] == False
     assert ret["singular_matrix"] == True
     assert ret["overflow_count"] == False
-    assert ret["equations_in_error"] == [42, 43]
+    assert ret["equations_in_error"] == {42, 43}

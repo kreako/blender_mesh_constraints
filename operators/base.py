@@ -10,5 +10,5 @@ class MeshConstraintsOperator(Operator):
         return {"CANCELLED"}
 
     def error(self, msg):
-        self.report({"ERRRO"}, msg)
+        self.report({"ERROR"}, msg)
         return {"CANCELLED"}

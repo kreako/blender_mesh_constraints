@@ -58,6 +58,7 @@ class MeshConstraintProperties(PropertyGroup):
     value0: FloatProperty(name="value0", description="Value 0 of the constraint")
     value1: FloatProperty(name="value1", description="Value 1 of the constraint")
     value2: FloatProperty(name="value2", description="Value 2 of the constraint")
+    in_error: BoolProperty(name="in_error", description="Constraint in error after solve")
     # View related
     view: BoolProperty(name="view", description="Show/hide in 3D view", default=True)
     show_details: BoolProperty(
@@ -77,6 +78,7 @@ class Constraint:
     def __init__(self, constraint_properties):
         self.kind = ConstraintsKind(constraint_properties.kind)
         self.data = {
+            "in_error": constraint_properties.in_error,
             "view": constraint_properties.view,
             "show_details": constraint_properties.show_details,
         }
@@ -142,6 +144,15 @@ class MeshConstraints:
 
     def remove(self, index):
         self.mc.constraints.remove(index)
+
+    def clear_in_errors(self):
+        """Clear all in_error flags on constraints"""
+        for c in self.mc.constraints:
+            c.in_error = False
+
+    def set_in_error(self, index):
+        """Set in_error flag to True on the linked constraint"""
+        self.mc.constraints[index].in_error = True
 
     def exist_constraint(self, kind, **kwargs):
         """Return index of the constraint if a constraint already exists on the MeshConstraintsContainer

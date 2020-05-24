@@ -233,11 +233,11 @@ class Solver:
 
             return {"solved": True, "points": points}
         else:
-            equations_in_error = []
+            equations_in_error = set()
             for i in range(nb_equations):
                 f = b[0, i]
                 if abs(f) > EPSILON or is_not_reasonable(f):
-                    equations_in_error.append(equations_constraints[i])
+                    equations_in_error.add(equations_constraints[i])
 
             return {"solved": False,
                     "not_convergent": not_convergent,

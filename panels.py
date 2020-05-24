@@ -19,6 +19,13 @@ class MeshConstraintsPanelMain(MeshConstraintsPanelBase):
         row = box.row()
         row.operator("mesh_constraints.solve", text="Solve", icon="SNAP_ON")
 
+        # TODO display Solver error here ?
+        # o = context.object
+        # if o is not None and "MeshConstraintGenerator" in o:
+            # an object with constraints in it
+            # mc = props.MeshConstraints(o.MeshConstraintGenerator)
+            # if 
+
         row = box.row()
         icon = (
             "PAUSE"
@@ -82,7 +89,8 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
             icon = "HIDE_OFF" if c.view else "HIDE_ON"
             row.prop(c.raw, "view", text="", toggle=True, icon=icon)
             row.prop(c.raw, "show_details", text="", toggle=True, icon="PREFERENCES")
-            row.label(text=c_abbreviation)
+            icon = "ERROR" if c.in_error else "NONE"
+            row.label(text=c_abbreviation, icon=icon)
             row.prop(c.raw, "value0", text="")
             if c.nb_values > 1:
                 row.prop(c.raw, "value1", text="")

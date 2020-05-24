@@ -1,6 +1,7 @@
 from ..props import ConstraintsKind
 import pytest
 
+
 @pytest.fixture(scope="function")
 def mesh_constraints_data():
     class Properties:
@@ -11,6 +12,7 @@ def mesh_constraints_data():
             self.value1 = kwargs.get("value1", 0.0)
             self.value2 = kwargs.get("value2", 0.0)
             self.value3 = kwargs.get("value3", 0.0)
+            self.in_error = kwargs.get("in_error", False)
             self.view = kwargs.get("view", False)
             self.show_details = kwargs.get("show_details", False)
 
