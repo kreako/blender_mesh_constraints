@@ -5,12 +5,22 @@
 
 import itertools
 import sys
+import math
 from mathutils import Vector
 
 
 sys.path.append("/home/noumir/.local/lib/python3.8/site-packages")
 from sympy import symbols, sqrt, diff
 from sympy.matrices import Matrix
+import mpmath
+
+EPSILON = 1e-8
+VERY_POSITIVE = 1e10
+VERY_NEGATIVE = -1e10
+
+
+def is_not_reasonable(x):
+    math.isnan(x) or x > VERY_POSITIVE or x < VERY_NEGATIVE
 
 
 class Point:
@@ -23,6 +33,9 @@ class Point:
     @property
     def xyz(self):
         return (self.x, self.y, self.z)
+
+    def __repr__(self):
+        return f"Point({self.index}, {self.x}, {self.y}, {self.z})"
 
 
 class Solver:
@@ -88,6 +101,7 @@ class Solver:
     def solve(self):
         """Solve and return an object representing the solve operation"""
         # TODO substitute fix equations
+        # TODO try to solve alone equation first ?
 
         # Solve AX = B, searching X
         # with A the value of the jacobian
@@ -95,12 +109,16 @@ class Solver:
 
         # Build list of equations
         equations = []
-        for _, equation in self.equations.items():
+        # equation index -> constraint
+        equations_constraints = {}
+        for constraint, equation in self.equations.items():
             equations.append(equation)
-        for _, values in self.fix_equations.items():
+            equations_constraints[len(equations) - 1] = constraint
+        for constraint, values in self.fix_equations.items():
             for param, value in values.items():
                 equations.append(param - value)
-        print("equations", equations)
+                equations_constraints[len(equations) - 1] = constraint
+        # print("equations", equations)
 
         # params -> values
         params_values = {}
@@ -122,7 +140,7 @@ class Solver:
         b = Matrix(1, nb_equations, [0] * nb_equations)
         for i in range(nb_equations):
             b[0, i] = equations[i].evalf(subs=params_values)
-        print("b", b.shape, b)
+        # print("b", b.shape, b)
 
         # Build jacobian
         # The equation part
@@ -132,9 +150,13 @@ class Solver:
         for i in range(nb_params):
             for j in range(nb_equations):
                 a_eq[i, j] = diff(equations[j], params[i])
-        print("a_eq", a_eq.shape, a_eq)
+        # print("a_eq", a_eq.shape, a_eq)
 
         count = 0
+
+        singular_matrix = False
+        done = False
+        not_convergent = False
 
         while True:
             # And let's begin the big show of solver iterations
@@ -143,6 +165,7 @@ class Solver:
             for i in range(nb_params):
                 for j in range(nb_equations):
                     a[i, j] = a_eq[i, j].evalf(subs=params_values)
+            # print("a", a)
 
             # Transpose
             at = a.transpose()
@@ -150,7 +173,17 @@ class Solver:
             bt = b.transpose()
 
             # LU Solve
-            z = aat.LUsolve(bt)
+            # print("aat", aat)
+            # print("bt", bt)
+            try:
+                z = Matrix(mpmath.lu_solve(aat, bt))
+                # z = aat.LUsolve(bt)
+            except ZeroDivisionError:
+                singular_matrix = True
+
+            if singular_matrix:
+                break
+            # print("z", z)
 
             # Compute X
             zt = z.transpose()
@@ -158,18 +191,27 @@ class Solver:
 
             # Move values
             for i, param in enumerate(params):
-                params_values[param] -= x[0, i]
+                val = params_values[param] - x[0, i]
+                params_values[param] = val
+                if is_not_reasonable(val):
+                    not_convergent = True
 
             # Values of equations on current point
             done = True
             for i in range(nb_equations):
                 e_eval = equations[i].evalf(subs=params_values)
                 b[0, i] = e_eval
-                if e_eval > 1e-4:
+                if abs(e_eval) > EPSILON:
                     # To big to quit, continue
                     done = False
+                if is_not_reasonable(e_eval):
+                    not_convergent = True
+            # print("b", done, b)
 
             if done:
+                break
+
+            if not_convergent:
                 break
 
             count += 1
@@ -191,4 +233,14 @@ class Solver:
 
             return {"solved": True, "points": points}
         else:
-            return {"solved": False, "error": "Convergence error"}
+            equations_in_error = []
+            for i in range(nb_equations):
+                f = b[0, i]
+                if abs(f) > EPSILON or is_not_reasonable(f):
+                    equations_in_error.append(equations_constraints[i])
+
+            return {"solved": False,
+                    "not_convergent": not_convergent,
+                    "overflow_count": count > 50,
+                    "singular_matrix": singular_matrix,
+                    "equations_in_error": equations_in_error}
