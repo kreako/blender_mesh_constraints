@@ -79,6 +79,8 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
         mc = props.MeshConstraints(o.MeshConstraintGenerator)
 
         box = self.layout.box()
+        if len(mc) == 0:
+            box.row(align=True).label(text="No constraints yet")
         for index, c in enumerate(mc):
             # TODO do something with ValueError ?
             c_kind = props.ConstraintsKind(c.kind)
@@ -91,11 +93,8 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
             row.prop(c.raw, "show_details", text="", toggle=True, icon="PREFERENCES")
             icon = "ERROR" if c.in_error else "NONE"
             row.label(text=c_abbreviation, icon=icon)
-            row.prop(c.raw, "value0", text="")
-            if c.nb_values > 1:
-                row.prop(c.raw, "value1", text="")
-            if c.nb_values > 2:
-                row.prop(c.raw, "value2", text="")
+            if c.nb_values == 1:
+                row.prop(c.raw, "value0", text="")
             delete_op = "mesh_constraints.delete_constraint"
 
             row.operator(delete_op, text="", icon="X").index = index
@@ -103,18 +102,35 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                 row = box.row(align=True)
                 row.label(text=c_display)
                 if c_kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
-                    row = box.row(align=True)
-                    row.prop(c.raw, "point0", text="Point0")
-                    row.prop(c.raw, "point1", text="Point1")
-                    row = box.row(align=True)
-                    row.label(text="")
-                elif c_kind in (
-                    props.ConstraintsKind.FIX_X_COORD,
-                    props.ConstraintsKind.FIX_Y_COORD,
-                    props.ConstraintsKind.FIX_Z_COORD,
-                ):
-                    row = box.row(align=True)
-                    row.prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "point0", text="Point0")
+                    box.row(align=True).prop(c.raw, "point1", text="Point1")
+                    box.row(align=True).prop(c.raw, "value0", text="Distance")
+                elif c_kind == props.ConstraintsKind.FIX_X_COORD:
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "value0", text="X")
+                elif c_kind == props.ConstraintsKind.FIX_Y_COORD:
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "value0", text="Y")
+                elif c_kind == props.ConstraintsKind.FIX_Z_COORD:
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "value0", text="Z")
+                elif c_kind == props.ConstraintsKind.FIX_XY_COORD:
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "value0", text="X")
+                    box.row(align=True).prop(c.raw, "value1", text="Y")
+                elif c_kind == props.ConstraintsKind.FIX_XZ_COORD:
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "value0", text="X")
+                    box.row(align=True).prop(c.raw, "value1", text="Z")
+                elif c_kind == props.ConstraintsKind.FIX_YZ_COORD:
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "value0", text="Y")
+                    box.row(align=True).prop(c.raw, "value1", text="Z")
+                elif c_kind == props.ConstraintsKind.FIX_XYZ_COORD:
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
+                    box.row(align=True).prop(c.raw, "value0", text="X")
+                    box.row(align=True).prop(c.raw, "value1", text="Y")
+                    box.row(align=True).prop(c.raw, "value2", text="Z")
                 else:
                     raise Exception(f"Not supported: {c_display}")
                 row = box.row(align=True)
