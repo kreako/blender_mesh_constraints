@@ -14,7 +14,8 @@ from sympy import symbols, sqrt, diff
 from sympy.matrices import Matrix
 import mpmath
 
-EPSILON = 1e-8
+EPSILON = 1e-6
+CONVERGENCE_TOLERANCE = 1e-8
 VERY_POSITIVE = 1e10
 VERY_NEGATIVE = -1e10
 
@@ -201,7 +202,7 @@ class Solver:
             for i in range(nb_equations):
                 e_eval = equations[i].evalf(subs=params_values)
                 b[0, i] = e_eval
-                if abs(e_eval) > EPSILON:
+                if abs(e_eval) > CONVERGENCE_TOLERANCE:
                     # To big to quit, continue
                     done = False
                 if is_not_reasonable(e_eval):
@@ -236,7 +237,7 @@ class Solver:
             equations_in_error = set()
             for i in range(nb_equations):
                 f = b[0, i]
-                if abs(f) > EPSILON or is_not_reasonable(f):
+                if abs(f) > CONVERGENCE_TOLERANCE or is_not_reasonable(f):
                     equations_in_error.add(equations_constraints[i])
 
             return {"solved": False,

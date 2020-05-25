@@ -7,6 +7,11 @@ from mathutils import Vector
 import blf
 
 from . import props
+from . import solver
+
+
+def equals(value, ref):
+    return ref - solver.EPSILON < value and value < ref + solver.EPSILON
 
 
 def draw_constraints_definition(context):
@@ -41,28 +46,30 @@ def draw_constraints_definition(context):
         if c_kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
             point0 = bm.verts[c.point0].co
             point1 = bm.verts[c.point1].co
-            _distance_between_2_vertices(context, point0, point1, c.distance)
+            _distance_between_2_vertices(
+                context, point0, point1, c.distance, c.in_error
+            )
         elif c_kind == props.ConstraintsKind.FIX_X_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, "x")
+            _fix_x_coord(context, point, c.x, c.in_error)
         elif c_kind == props.ConstraintsKind.FIX_Y_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, "y")
+            _fix_y_coord(context, point, c.y, c.in_error)
         elif c_kind == props.ConstraintsKind.FIX_Z_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, "z")
+            _fix_z_coord(context, point, c.z, c.in_error)
         elif c_kind == props.ConstraintsKind.FIX_XY_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, "xy")
+            _fix_xy_coord(context, point, c.x, c.y, c.in_error)
         elif c_kind == props.ConstraintsKind.FIX_XZ_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, "xz")
+            _fix_xz_coord(context, point, c.x, c.z, c.in_error)
         elif c_kind == props.ConstraintsKind.FIX_YZ_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, "yz")
+            _fix_yz_coord(context, point, c.y, c.z, c.in_error)
         elif c_kind == props.ConstraintsKind.FIX_XYZ_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, "xyz")
+            _fix_xyz_coord(context, point, c.x, c.y, c.z, c.in_error)
         else:
             # Don't want to raise an error here but it deserves it
             pass
@@ -100,11 +107,11 @@ def draw_red_bounds(context):
     batch = batch_for_shader(shader, "LINES", {"pos": vertices}, indices=indices)
 
     shader.bind()
-    shader.uniform_float("color", COLOR_TEAL_400)
+    shader.uniform_float("color", COLOR_OK)
     batch.draw(shader)
 
 
-def _distance_between_2_vertices(context, p0_3d, p1_3d, distance):
+def _distance_between_2_vertices(context, p0_3d, p1_3d, distance, in_error):
     """Draw the constraint DISTANCE_BETWEEN_2_VERTICES"""
     region = context.region
     rv3d = context.space_data.region_3d
@@ -132,12 +139,25 @@ def _distance_between_2_vertices(context, p0_3d, p1_3d, distance):
     # Now the point on (p0_2d - p0_n_2d) vector so (p0_n0_2d - p0_2d).length == EDGE_CONSTRAINT_SPACING
     p0_n0_2d = p0_2d.lerp(p0_n_2d, EDGE_CONSTRAINT_SPACING / (p0_n_2d - p0_2d).length)
     # Same story with EDGE_CONSTRAINT_SPACING * 1.3
-    p0_n1_2d = p0_2d.lerp(p0_n_2d, EDGE_CONSTRAINT_SPACING * 1.3 / (p0_n_2d - p0_2d).length)
+    p0_n1_2d = p0_2d.lerp(
+        p0_n_2d, EDGE_CONSTRAINT_SPACING * 1.3 / (p0_n_2d - p0_2d).length
+    )
 
     # Keep p0_n0_2d - p1_n0_2d parallel to p0_2d - p1_2d
     p1_n0_2d = p0_n0_2d + v_2d
     # Same
     p1_n1_2d = p0_n1_2d + v_2d
+
+    # Color change
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if equals(v_3d.length, distance):
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
 
     # Now text drawing
     txt = _format_distance(context, distance)
@@ -146,23 +166,114 @@ def _distance_between_2_vertices(context, p0_3d, p1_3d, distance):
     p_n0_middle = p0_n0_2d.lerp(p1_n0_2d, 0.5)
     blf.position(font_id, p_n0_middle[0] - width / 2, p_n0_middle[1] - height / 2, 0)
     blf.size(font_id, FONT_SIZE, 72)
-    blf.color(font_id, *COLOR_TEAL_400)
+    blf.color(font_id, *color)
     blf.draw(font_id, txt)
 
     # Draw the lines
     # TODO cut the line on the text box
     vertices = [p0_2d, p1_2d, p0_n0_2d, p1_n0_2d, p0_n1_2d, p1_n1_2d]
     indices = ((0, 4), (1, 5), (2, 3))
-    shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-    batch = batch_for_shader(shader, 'LINES', {"pos": vertices}, indices=indices)
+    shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+    batch = batch_for_shader(shader, "LINES", {"pos": vertices}, indices=indices)
 
     shader.bind()
-    shader.uniform_float("color", COLOR_TEAL_400)
+    shader.uniform_float("color", color)
     batch.draw(shader)
 
 
+def _fix_x_coord(context, point_3d, x, in_error):
+    print(point_3d.x, x)
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if equals(point_3d.x, x):
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
+    _fix_coord(context, point_3d, "x", color)
 
-def _fix_xyz_coord(context, point_3d, label):
+
+def _fix_y_coord(context, point_3d, y, in_error):
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if point_3d.y == y:
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
+    _fix_coord(context, point_3d, "y", color)
+
+
+def _fix_z_coord(context, point_3d, z, in_error):
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if point_3d.z == z:
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
+    _fix_coord(context, point_3d, "z", color)
+
+
+def _fix_xy_coord(context, point_3d, x, y, in_error):
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if point_3d.x == x and point_3d.y == y:
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
+    _fix_coord(context, point_3d, "xy", color)
+
+
+def _fix_xz_coord(context, point_3d, x, z, in_error):
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if point_3d.x == x and point_3d.z == z:
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
+    _fix_coord(context, point_3d, "xz", color)
+
+
+def _fix_yz_coord(context, point_3d, y, z, in_error):
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if point_3d.y == y and point_3d.z == z:
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
+    _fix_coord(context, point_3d, "yz", color)
+
+
+def _fix_xyz_coord(context, point_3d, x, y, z, in_error):
+    if in_error:
+        color = COLOR_SOLVER_NOK
+    else:
+        if point_3d.x == x and point_3d.y == y and point_3d.z == z:
+            # Constraint is OK
+            color = COLOR_OK
+        else:
+            # Constraint is not OK
+            color = COLOR_CONSTRAINT_NOK
+    _fix_coord(context, point_3d, "xyz", color)
+
+
+def _fix_coord(context, point_3d, label, color):
     """Draw the constraint FIX_{X,Y,Z}_COORD"""
     region = context.region
     rv3d = context.space_data.region_3d
@@ -176,25 +287,37 @@ def _fix_xyz_coord(context, point_3d, label):
         return
 
     # Draw the box
-    vertices = [world_point_2d + Vector((-VERTEX_BOX_MARGIN, -VERTEX_BOX_MARGIN)),
-                world_point_2d + Vector((-VERTEX_BOX_MARGIN, VERTEX_BOX_MARGIN)),
-                world_point_2d + Vector((VERTEX_BOX_MARGIN, VERTEX_BOX_MARGIN)),
-                world_point_2d + Vector((VERTEX_BOX_MARGIN, -VERTEX_BOX_MARGIN))]
-    indices = ((0, 1), (1, 2), (2, 3), (3, 0),)
-    shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-    batch = batch_for_shader(shader, 'LINES', {"pos": vertices}, indices=indices)
+    vertices = [
+        world_point_2d + Vector((-VERTEX_BOX_MARGIN, -VERTEX_BOX_MARGIN)),
+        world_point_2d + Vector((-VERTEX_BOX_MARGIN, VERTEX_BOX_MARGIN)),
+        world_point_2d + Vector((VERTEX_BOX_MARGIN, VERTEX_BOX_MARGIN)),
+        world_point_2d + Vector((VERTEX_BOX_MARGIN, -VERTEX_BOX_MARGIN)),
+    ]
+    indices = (
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 0),
+    )
+    shader = gpu.shader.from_builtin("2D_UNIFORM_COLOR")
+    batch = batch_for_shader(shader, "LINES", {"pos": vertices}, indices=indices)
 
     shader.bind()
-    # TODO color for violation ?
+
     # Or leave it to draw violation thing ?
-    shader.uniform_float("color", COLOR_TEAL_400)
+    shader.uniform_float("color", color)
     batch.draw(shader)
 
     # Now the label
     font_id = 0
-    blf.position(font_id, world_point_2d[0] + 1.5 * VERTEX_BOX_MARGIN, world_point_2d[1] - VERTEX_BOX_MARGIN, 0)
+    blf.position(
+        font_id,
+        world_point_2d[0] + 1.5 * VERTEX_BOX_MARGIN,
+        world_point_2d[1] - VERTEX_BOX_MARGIN,
+        0,
+    )
     blf.size(font_id, FONT_SIZE, 72)
-    blf.color(font_id, *COLOR_TEAL_400)
+    blf.color(font_id, *color)
     blf.draw(font_id, label)
 
 
@@ -256,5 +379,11 @@ VERTEX_BOX_MARGIN = 4
 EDGE_CONSTRAINT_SPACING = 10
 
 COLOR_TEAL_400 = _from_hex_rgb(0x4F, 0xD1, 0xC5)
+COLOR_RED_600 = _from_hex_rgb(0xE5, 0x3E, 0x3E)
+COLOR_PINK_600 = _from_hex_rgb(0xD5, 0x3F, 0x8C)
+
+COLOR_OK = COLOR_TEAL_400
+COLOR_SOLVER_NOK = COLOR_RED_600
+COLOR_CONSTRAINT_NOK = COLOR_PINK_600
 
 FONT_SIZE = 15
