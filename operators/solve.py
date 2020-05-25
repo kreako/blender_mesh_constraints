@@ -32,8 +32,8 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
 
         ConstraintsKind = props.ConstraintsKind
 
-        # TODO progress bar
-        # WindowManager progress_begin
+        context.window_manager.progress_begin(0, solver.MAX_ITERATIONS + 1)
+        context.window_manager.progress_update(0)
 
         s = solver.Solver()
         for index, c in enumerate(mc):
@@ -68,17 +68,23 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
             else:
                 raise Exception(f"Unknown kind of constraints {self.kind}")
 
-        solution = s.solve()
+        context.window_manager.progress_update(1)
+
+        solution = s.solve(lambda x: context.window_manager.progress_update(1 + x))
+
+        context.window_manager.progress_end()
 
         if solution["solved"]:
             for point in solution["points"]:
                 bm.verts[point.index].co = point.xyz
             bmesh.update_edit_mesh(mesh, loop_triangles=True, destructive=False)
             self.info("Solved !")
+            context.area.tag_redraw()
             return {"FINISHED"}
         else:
             print(solution)
             nb_in_errors = len(solution["equations_in_error"])
             for in_error in solution["equations_in_error"]:
                 mc.set_in_error(in_error)
+            context.area.tag_redraw()
             return self.error(f"Not Solved : Constraints did not converged, {nb_in_errors} conflicting...")

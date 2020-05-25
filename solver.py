@@ -18,6 +18,7 @@ EPSILON = 1e-6
 CONVERGENCE_TOLERANCE = 1e-8
 VERY_POSITIVE = 1e10
 VERY_NEGATIVE = -1e10
+MAX_ITERATIONS = 50
 
 
 def is_not_reasonable(x):
@@ -99,8 +100,9 @@ class Solver:
             self.fix_equations[constraint] = {}
         self.fix_equations[constraint][z_param] = z
 
-    def solve(self):
-        """Solve and return an object representing the solve operation"""
+    def solve(self, progress=None):
+        """Solve and return an object representing the solve operation
+        progress a callback called with count number on iteration"""
         # TODO substitute fix equations
         # TODO try to solve alone equation first ?
 
@@ -161,6 +163,8 @@ class Solver:
 
         while True:
             # And let's begin the big show of solver iterations
+            if progress is not None:
+                progress(count)
 
             # Eval jacobian on point
             for i in range(nb_params):
@@ -216,8 +220,8 @@ class Solver:
                 break
 
             count += 1
-            if count > 50:
-                # Over 50 ? probably a convergence error
+            if count > MAX_ITERATIONS:
+                # Over MAX_ITERATIONS ? probably a convergence error
                 break
 
         if done:
@@ -242,6 +246,6 @@ class Solver:
 
             return {"solved": False,
                     "not_convergent": not_convergent,
-                    "overflow_count": count > 50,
+                    "overflow_count": count > MAX_ITERATIONS,
                     "singular_matrix": singular_matrix,
                     "equations_in_error": equations_in_error}
