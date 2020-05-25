@@ -46,30 +46,28 @@ def draw_constraints_definition(context):
         if c_kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
             point0 = bm.verts[c.point0].co
             point1 = bm.verts[c.point1].co
-            _distance_between_2_vertices(
-                context, point0, point1, c.distance, c.in_error
-            )
+            _distance_between_2_vertices(context, point0, point1, c)
         elif c_kind == props.ConstraintsKind.FIX_X_COORD:
             point = bm.verts[c.point].co
-            _fix_x_coord(context, point, c.x, c.in_error)
+            _fix_x_coord(context, point, c)
         elif c_kind == props.ConstraintsKind.FIX_Y_COORD:
             point = bm.verts[c.point].co
-            _fix_y_coord(context, point, c.y, c.in_error)
+            _fix_y_coord(context, point, c)
         elif c_kind == props.ConstraintsKind.FIX_Z_COORD:
             point = bm.verts[c.point].co
-            _fix_z_coord(context, point, c.z, c.in_error)
+            _fix_z_coord(context, point, c)
         elif c_kind == props.ConstraintsKind.FIX_XY_COORD:
             point = bm.verts[c.point].co
-            _fix_xy_coord(context, point, c.x, c.y, c.in_error)
+            _fix_xy_coord(context, point, c)
         elif c_kind == props.ConstraintsKind.FIX_XZ_COORD:
             point = bm.verts[c.point].co
-            _fix_xz_coord(context, point, c.x, c.z, c.in_error)
+            _fix_xz_coord(context, point, c)
         elif c_kind == props.ConstraintsKind.FIX_YZ_COORD:
             point = bm.verts[c.point].co
-            _fix_yz_coord(context, point, c.y, c.z, c.in_error)
+            _fix_yz_coord(context, point, c)
         elif c_kind == props.ConstraintsKind.FIX_XYZ_COORD:
             point = bm.verts[c.point].co
-            _fix_xyz_coord(context, point, c.x, c.y, c.z, c.in_error)
+            _fix_xyz_coord(context, point, c)
         else:
             # Don't want to raise an error here but it deserves it
             pass
@@ -111,7 +109,22 @@ def draw_red_bounds(context):
     batch.draw(shader)
 
 
-def _distance_between_2_vertices(context, p0_3d, p1_3d, distance, in_error):
+def _select_color(constraint, constraint_ok):
+    # Color change
+    if constraint.show_details:
+        # show detail
+        return COLOR_SHOW_DETAIL
+    if constraint.in_error:
+        # is in solver error
+        return COLOR_SOLVER_NOK
+    if constraint_ok:
+        # Constraint is OK
+        return COLOR_OK
+    # Constraint is not OK
+    return COLOR_CONSTRAINT_NOK
+
+
+def _distance_between_2_vertices(context, p0_3d, p1_3d, constraint):
     """Draw the constraint DISTANCE_BETWEEN_2_VERTICES"""
     region = context.region
     rv3d = context.space_data.region_3d
@@ -149,18 +162,10 @@ def _distance_between_2_vertices(context, p0_3d, p1_3d, distance, in_error):
     p1_n1_2d = p0_n1_2d + v_2d
 
     # Color change
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if equals(v_3d.length, distance):
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+    color = _select_color(constraint, equals(v_3d.length, constraint.distance))
 
     # Now text drawing
-    txt = _format_distance(context, distance)
+    txt = _format_distance(context, constraint.distance)
     font_id = 0
     width, height = blf.dimensions(font_id, txt)
     p_n0_middle = p0_n0_2d.lerp(p1_n0_2d, 0.5)
@@ -181,95 +186,52 @@ def _distance_between_2_vertices(context, p0_3d, p1_3d, distance, in_error):
     batch.draw(shader)
 
 
-def _fix_x_coord(context, point_3d, x, in_error):
-    print(point_3d.x, x)
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if equals(point_3d.x, x):
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+def _fix_x_coord(context, point_3d, constraint):
+    color = _select_color(constraint, equals(point_3d.x, constraint.x))
     _fix_coord(context, point_3d, "x", color)
 
 
-def _fix_y_coord(context, point_3d, y, in_error):
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if point_3d.y == y:
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+def _fix_y_coord(context, point_3d, constraint):
+    color = _select_color(constraint, equals(point_3d.y, constraint.y))
     _fix_coord(context, point_3d, "y", color)
 
 
-def _fix_z_coord(context, point_3d, z, in_error):
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if point_3d.z == z:
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+def _fix_z_coord(context, point_3d, constraint):
+    color = _select_color(constraint, equals(point_3d.z, constraint.z))
     _fix_coord(context, point_3d, "z", color)
 
 
-def _fix_xy_coord(context, point_3d, x, y, in_error):
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if point_3d.x == x and point_3d.y == y:
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+def _fix_xy_coord(context, point_3d, constraint):
+    color = _select_color(
+        constraint,
+        equals(point_3d.x, constraint.x) and equals(point_3d.y, constraint.y),
+    )
     _fix_coord(context, point_3d, "xy", color)
 
 
-def _fix_xz_coord(context, point_3d, x, z, in_error):
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if point_3d.x == x and point_3d.z == z:
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+def _fix_xz_coord(context, point_3d, constraint):
+    color = _select_color(
+        constraint,
+        equals(point_3d.x, constraint.x) and equals(point_3d.z, constraint.z),
+    )
     _fix_coord(context, point_3d, "xz", color)
 
 
-def _fix_yz_coord(context, point_3d, y, z, in_error):
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if point_3d.y == y and point_3d.z == z:
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+def _fix_yz_coord(context, point_3d, constraint):
+    color = _select_color(
+        constraint,
+        equals(point_3d.y, constraint.y) and equals(point_3d.z, constraint.z),
+    )
     _fix_coord(context, point_3d, "yz", color)
 
 
-def _fix_xyz_coord(context, point_3d, x, y, z, in_error):
-    if in_error:
-        color = COLOR_SOLVER_NOK
-    else:
-        if point_3d.x == x and point_3d.y == y and point_3d.z == z:
-            # Constraint is OK
-            color = COLOR_OK
-        else:
-            # Constraint is not OK
-            color = COLOR_CONSTRAINT_NOK
+def _fix_xyz_coord(context, point_3d, constraint):
+    color = _select_color(
+        constraint,
+        equals(point_3d.x, constraint.x)
+        and equals(point_3d.y, constraint.y)
+        and equals(point_3d.z, constraint.z),
+    )
     _fix_coord(context, point_3d, "xyz", color)
 
 
@@ -381,9 +343,12 @@ EDGE_CONSTRAINT_SPACING = 10
 COLOR_TEAL_400 = _from_hex_rgb(0x4F, 0xD1, 0xC5)
 COLOR_RED_600 = _from_hex_rgb(0xE5, 0x3E, 0x3E)
 COLOR_PINK_600 = _from_hex_rgb(0xD5, 0x3F, 0x8C)
+COLOR_GREEN_400 = _from_hex_rgb(0x68, 0xD3, 0x91)
+COLOR_ORANGE_400 = _from_hex_rgb(0xF6, 0xAD, 0x55)
 
 COLOR_OK = COLOR_TEAL_400
 COLOR_SOLVER_NOK = COLOR_RED_600
 COLOR_CONSTRAINT_NOK = COLOR_PINK_600
+COLOR_SHOW_DETAIL = COLOR_ORANGE_400
 
 FONT_SIZE = 15
