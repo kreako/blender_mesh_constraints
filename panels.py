@@ -74,6 +74,7 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
         o = context.object
         if o is None or "MeshConstraintGenerator" not in o:
             # I need an object with constraints in it !
+            self.layout.box().row(align=True).label(text="No constraints yet")
             return
 
         mc = props.MeshConstraints(o.MeshConstraintGenerator)
