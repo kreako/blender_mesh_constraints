@@ -276,10 +276,11 @@ class MESH_CONSTRAINTS_OT_ConstraintParallel2Edges(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_parallel_2_edges"
     bl_label = "Parallel constraint between 2 edges"
     bl_description = (
-        "Add a parallel constraint between 2 edges (select 4 vertices or 2 edges) (EDITMODE only)"
+        "Add a parallel constraint between 2 edges (select 2 edges) (EDITMODE only)"
     )
 
     def constraint_execute(self, context):
+        # TODO if vertex selection ?
         edges_list = self.selected_edges()
 
         if len(edges_list) != 2:
@@ -297,5 +298,35 @@ class MESH_CONSTRAINTS_OT_ConstraintParallel2Edges(ConstraintOperator):
             return self.warning("This constraint already exists...")
 
         self.mc.add_parallel(p0, p1, p2, p3)
+
+        return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_ConstraintPerpendicular2Edges(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_perpendicular_2_edges"
+    bl_label = "Perpendicular constraint between 2 edges"
+    bl_description = (
+        "Add a perpendicular constraint between 2 edges (select 4 vertices or 2 edges) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        # TODO if vertex selection ?
+        edges_list = self.selected_edges()
+
+        if len(edges_list) != 2:
+            # TODO: add multiple constraints at once
+            return self.warning(
+                "I need you to select 2 edges or I'm not able to add a parallel constraint between 2 edges"
+            )
+
+        edge0, edge1 = edges_list
+        p0, p1 = [v.index for v in self.bm.edges[edge0].verts]
+        p2, p3 = [v.index for v in self.bm.edges[edge1].verts]
+
+        k = props.ConstraintsKind.PERPENDICULAR
+        if self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3) is not None:
+            return self.warning("This constraint already exists...")
+
+        self.mc.add_perpendicular(p0, p1, p2, p3)
 
         return {"FINISHED"}

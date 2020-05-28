@@ -46,6 +46,7 @@ class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
         row = box.row()
         row.operator("mesh_constraints.constraint_distance_2_vertices", text="Distance")
         row.operator("mesh_constraints.constraint_parallel_2_edges", text="Parallel")
+        row.operator("mesh_constraints.constraint_perpendicular_2_edges", text="Perpendicular")
         row = box.row()
         row.operator("mesh_constraints.constraint_fix_xyz_coord", text="XYZ")
         row.operator("mesh_constraints.constraint_fix_x_coord", text="X")

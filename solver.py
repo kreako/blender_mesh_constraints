@@ -367,7 +367,13 @@ class NewtonSolver:
             if rank_ok:
                 dof = self.calculate_dof()
             self.reduce_substitution()
-            return {"solved": True, "values": self.values, "dof": dof, "rank_ok": rank_ok, "rank": rank}
+            return {
+                "solved": True,
+                "values": self.values,
+                "dof": dof,
+                "rank_ok": rank_ok,
+                "rank": rank,
+            }
         else:
             # Error find out which one of the equations are problematics
             equations_in_error = set()
@@ -488,6 +494,26 @@ class Solver:
         self._add_equation(constraint, v0z * v1x - v0x * v1z)
         self._add_equation(constraint, v0x * v1y - v0y * v1x)
 
+    def perpendicular(self, constraint, point0, point1, point2, point3):
+        """Add a perpendicular constraint between p0-p1 and p2-p3"""
+        p0 = self.points[point0]
+        p1 = self.points[point1]
+        p2 = self.points[point2]
+        p3 = self.points[point3]
+
+        # v0 : vector p0-p1
+        v0x = p1.x_param - p0.x_param
+        v0y = p1.y_param - p0.y_param
+        v0z = p1.z_param - p0.z_param
+
+        # v1 : vector p2-p3
+        v1x = p3.x_param - p2.x_param
+        v1y = p3.y_param - p2.y_param
+        v1z = p3.z_param - p2.z_param
+
+        # dot product of v0 and v1 should be 0
+        self._add_equation(constraint, v0x * v1x + v0y * v1y + v0z * v1z)
+
     def solve(self):
         """Solve and return an object representing the solve operation with
         - "solved" boolean, True if the solve process is a success
@@ -510,7 +536,9 @@ class Solver:
             return ret
         else:
             # solve failed :(
-            ret["equations_in_error"] = [self.equations_constraints[i] for i in ret["equations_in_error"]]
+            ret["equations_in_error"] = [
+                self.equations_constraints[i] for i in ret["equations_in_error"]
+            ]
             return ret
 
     def find_which_to_remove_to_fix_jacobian():

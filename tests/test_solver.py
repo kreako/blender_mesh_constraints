@@ -19,6 +19,9 @@ class Vector3:
             self.x * other.y - self.y * other.x,
         )
 
+    def dot(self, other):
+        return self.x * other.x + self.y * other.y + self.z * other.z
+
     def __sub__(self, other):
         return Vector3(self.x - other.x, self.y - other.y, self.z - other.z,)
 
@@ -488,3 +491,62 @@ def test_solver_low_rank():
     s.distance_2_vertices(43, 0, 1, 20)
     ret = s.solve()
     assert ret["solved"] == False
+
+
+def test_solver_perpendicular():
+    s = Solver(
+        [
+            MeshPoint(0, Vector3(0, 0, 0)),
+            MeshPoint(1, Vector3(10, 10, 10)),
+            MeshPoint(2, Vector3(5, 10, 5)),
+            MeshPoint(3, Vector3(7, 8, 9)),
+        ]
+    )
+
+    s.fix_x(42, 0, 0)
+    s.fix_y(42, 0, 0)
+    s.fix_z(42, 0, 0)
+
+    s.fix_x(42, 1, 10)
+    s.fix_y(42, 1, 10)
+    s.fix_z(42, 1, 10)
+
+    s.fix_x(42, 2, 5)
+    s.fix_y(42, 2, 10)
+    s.fix_z(42, 2, 5)
+
+    s.perpendicular(42, 0, 1, 2, 3)
+
+    ret = s.solve()
+
+    assert ret["solved"]
+    points = ret["points"]
+    assert len(points) == 4
+    p0 = points[0]
+    p1 = points[1]
+    p2 = points[2]
+    p3 = points[3]
+
+    assert p0.index == 0
+    assert p1.index == 1
+    assert p2.index == 2
+    assert p3.index == 3
+
+    assert equal_float(p0.x, 0)
+    assert equal_float(p0.y, 0)
+    assert equal_float(p0.z, 0)
+
+    assert equal_float(p1.x, 10)
+    assert equal_float(p1.y, 10)
+    assert equal_float(p1.z, 10)
+
+    assert equal_float(p2.x, 5)
+    assert equal_float(p2.y, 10)
+    assert equal_float(p2.z, 5)
+
+    v0 = Vector3(p0.x, p0.y, p0.z) - Vector3(p1.x, p1.y, p1.z)
+    v1 = Vector3(p2.x, p2.y, p2.z) - Vector3(p3.x, p3.y, p3.z)
+
+    d = v0.dot(v1)
+
+    assert equal_float(d, 0)

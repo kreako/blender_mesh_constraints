@@ -57,6 +57,8 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
                 s.fix_z(index, c.point, c.z)
             elif c.kind == ConstraintsKind.PARALLEL:
                 s.parallel(index, c.point0, c.point1, c.point2, c.point3)
+            elif c.kind == ConstraintsKind.PERPENDICULAR:
+                s.perpendicular(index, c.point0, c.point1, c.point2, c.point3)
             else:
                 raise Exception(f"Unknown kind of constraints {c.kind}")
 

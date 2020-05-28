@@ -22,6 +22,7 @@ class ConstraintsKind(Enum):
     FIX_XZ_COORD = "7"
     FIX_XYZ_COORD = "8"
     PARALLEL = "9"
+    PERPENDICULAR = "10"
 
 
 # For kind EnumProperty
@@ -46,7 +47,8 @@ constraints_kind_abbreviation = {
     ConstraintsKind.FIX_YZ_COORD: "FYZ",
     ConstraintsKind.FIX_XZ_COORD: "FXZ",
     ConstraintsKind.FIX_XYZ_COORD: "FXYZ",
-    ConstraintsKind.PARALLEL: "PAR",
+    ConstraintsKind.PARALLEL: "PARA",
+    ConstraintsKind.PERPENDICULAR: "PERP",
 }
 
 
@@ -129,6 +131,12 @@ class Constraint:
             self.data["point2"] = constraint_properties.point2
             self.data["point3"] = constraint_properties.point3
             self.nb_values = 0
+        elif self.kind == ConstraintsKind.PERPENDICULAR:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.data["point2"] = constraint_properties.point2
+            self.data["point3"] = constraint_properties.point3
+            self.nb_values = 0
         else:
             raise Exception(f"Unknown kind of constraints {self.kind}")
 
@@ -197,7 +205,7 @@ class MeshConstraints:
                     point = kwargs["point"]
                     if c.point0 == point:
                         return index
-                elif c_kind == ConstraintsKind.PARALLEL:
+                elif c_kind in (ConstraintsKind.PARALLEL, ConstraintsKind.PERPENDICULAR):
                     point0 = kwargs["point0"]
                     point1 = kwargs["point1"]
                     point2 = kwargs["point2"]
@@ -317,6 +325,19 @@ class MeshConstraints:
         point3: vertex index of 2nd point of the 2nd vector"""
         c = self._add()
         c.kind = ConstraintsKind.PARALLEL.value
+        c.point0 = point0
+        c.point1 = point1
+        c.point2 = point2
+        c.point3 = point3
+
+    def add_perpendicular(self, point0, point1, point2, point3):
+        """Add a ConstraintsKind::PERPENDICULAR with parameters
+        point0: vertex index of 1st point of the 1st vector
+        point1: vertex index of 2nd point of the 1st vector
+        point2: vertex index of 1st point of the 2nd vector
+        point3: vertex index of 2nd point of the 2nd vector"""
+        c = self._add()
+        c.kind = ConstraintsKind.PERPENDICULAR.value
         c.point0 = point0
         c.point1 = point1
         c.point2 = point2

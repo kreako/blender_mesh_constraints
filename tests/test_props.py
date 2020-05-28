@@ -209,3 +209,22 @@ def test_parallel(mesh_constraints_data):
 def test_constraints_abbreviation():
     for k in ConstraintsKind:
         assert k in constraints_kind_abbreviation
+
+
+def test_perpendicular(mesh_constraints_data):
+    mc = MeshConstraints(mesh_constraints_data)
+    k = ConstraintsKind.PERPENDICULAR
+    assert mc.exist_constraint(k, point0=2, point1=3, point2=5, point3=6) is None
+    assert mc.exist_constraint(k, point0=1, point1=3, point2=5, point3=6) is None
+    mc.add_perpendicular(2, 3, 5, 6)
+    assert mc.exist_constraint(k, point0=1, point1=3, point2=5, point3=6) is None
+    assert mc.exist_constraint(k, point0=2, point1=3, point2=5, point3=6) == 0
+    assert mc.exist_constraint(k, point0=3, point1=2, point2=5, point3=6) == 0
+    assert mc.exist_constraint(k, point0=3, point1=2, point2=6, point3=5) == 0
+    assert mc.exist_constraint(k, point0=2, point1=3, point2=6, point3=5) == 0
+    c = mc[0]
+    assert c.kind == ConstraintsKind.PERPENDICULAR
+    assert c.point0 == 2
+    assert c.point1 == 3
+    assert c.point2 == 5
+    assert c.point3 == 6
