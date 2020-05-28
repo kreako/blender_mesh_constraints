@@ -32,47 +32,35 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
 
         ConstraintsKind = props.ConstraintsKind
 
-        context.window_manager.progress_begin(0, solver.MAX_ITERATIONS + 1)
-        context.window_manager.progress_update(0)
-
-        s = solver.Solver()
+        s = solver.Solver([solver.MeshPoint(v.index, v.co) for v in bm.verts])
         for index, c in enumerate(mc):
             if c.kind == ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
-                s.distance_2_vertices(
-                    index,
-                    c.point0,
-                    bm.verts[c.point0].co,
-                    c.point1,
-                    bm.verts[c.point1].co,
-                    c.distance,
-                )
+                s.distance_2_vertices(index, c.point0, c.point1, c.distance)
             elif c.kind == ConstraintsKind.FIX_X_COORD:
-                s.fix_x(index, c.point, bm.verts[c.point].co, c.x)
+                s.fix_x(index, c.point, c.x)
             elif c.kind == ConstraintsKind.FIX_Y_COORD:
-                s.fix_y(index, c.point, bm.verts[c.point].co, c.y)
+                s.fix_y(index, c.point, c.y)
             elif c.kind == ConstraintsKind.FIX_Z_COORD:
-                s.fix_z(index, c.point, bm.verts[c.point].co, c.z)
+                s.fix_z(index, c.point, c.z)
             elif c.kind == ConstraintsKind.FIX_XY_COORD:
-                s.fix_x(index, c.point, bm.verts[c.point].co, c.x)
-                s.fix_y(index, c.point, bm.verts[c.point].co, c.y)
+                s.fix_x(index, c.point, c.x)
+                s.fix_y(index, c.point, c.y)
             elif c.kind == ConstraintsKind.FIX_XZ_COORD:
-                s.fix_x(index, c.point, bm.verts[c.point].co, c.x)
-                s.fix_z(index, c.point, bm.verts[c.point].co, c.z)
+                s.fix_x(index, c.point, c.x)
+                s.fix_z(index, c.point, c.z)
             elif c.kind == ConstraintsKind.FIX_YZ_COORD:
-                s.fix_y(index, c.point, bm.verts[c.point].co, c.y)
-                s.fix_z(index, c.point, bm.verts[c.point].co, c.z)
+                s.fix_y(index, c.point, c.y)
+                s.fix_z(index, c.point, c.z)
             elif c.kind == ConstraintsKind.FIX_XYZ_COORD:
-                s.fix_x(index, c.point, bm.verts[c.point].co, c.x)
-                s.fix_y(index, c.point, bm.verts[c.point].co, c.y)
-                s.fix_z(index, c.point, bm.verts[c.point].co, c.z)
+                s.fix_x(index, c.point, c.x)
+                s.fix_y(index, c.point, c.y)
+                s.fix_z(index, c.point, c.z)
+            elif c.kind == ConstraintsKind.PARALLEL:
+                s.parallel(index, c.point0, c.point1, c.point2, c.point3)
             else:
-                raise Exception(f"Unknown kind of constraints {self.kind}")
+                raise Exception(f"Unknown kind of constraints {c.kind}")
 
-        context.window_manager.progress_update(1)
-
-        solution = s.solve(lambda x: context.window_manager.progress_update(1 + x))
-
-        context.window_manager.progress_end()
+        solution = s.solve()
 
         if solution["solved"]:
             for point in solution["points"]:
@@ -87,4 +75,9 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
             for in_error in solution["equations_in_error"]:
                 mc.set_in_error(in_error)
             context.area.tag_redraw()
-            return self.error(f"Not Solved : Constraints did not converged, {nb_in_errors} conflicting...")
+            if nb_in_errors:
+                return self.error(
+                    f"Not Solved : Constraints did not converged, {nb_in_errors} conflicting..."
+                )
+            else:
+                return self.error(f"Not Solved : Constraints did not converged")

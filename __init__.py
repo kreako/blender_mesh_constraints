@@ -8,7 +8,8 @@ bl_info = {
     "description": "Mesh constraints solver for auto-positionning of vertices",
     "location": "View3D > Sidebar > Constraints Tab",
     "wiki_url": "TODO",
-    "category": "Mesh"}
+    "category": "Mesh",
+}
 
 
 # import os.path
@@ -37,6 +38,7 @@ if reload:
     # When using script.reload in blender
     # For development...
     import importlib
+
     importlib.reload(props)
     importlib.reload(drawing)
     importlib.reload(operators)
@@ -47,16 +49,18 @@ if reload:
 
 def register():
     # Properties
-    WindowManager.mesh_constraints_draw_constraints_definition = BoolProperty(default=False)
-    WindowManager.mesh_constraints_draw_constraints_violation = BoolProperty(default=False)
+    WindowManager.mesh_constraints_draw_constraints_definition = BoolProperty(
+        default=False
+    )
 
     register_class(props.MeshConstraintProperties)
     register_class(props.MeshConstraintsContainer)
-    bpy.types.Object.MeshConstraintGenerator = CollectionProperty(type=props.MeshConstraintsContainer)
+    bpy.types.Object.MeshConstraintGenerator = CollectionProperty(
+        type=props.MeshConstraintsContainer
+    )
 
     # Operators
     register_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsDefinition)
-    register_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsViolation)
     register_class(operators.MESH_CONSTRAINTS_OT_Solve)
     register_class(operators.MESH_CONSTRAINTS_OT_DeleteConstraint)
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
@@ -67,6 +71,7 @@ def register():
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXZCoord)
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixYZCoord)
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord)
+    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintParallel2Edges)
 
     # Panels
     register_class(panels.MeshConstraintsPanelMain)
@@ -84,7 +89,6 @@ def unregister():
 
     # Operators
     unregister_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsDefinition)
-    unregister_class(operators.MESH_CONSTRAINTS_OT_DrawConstraintsViolation)
     unregister_class(operators.MESH_CONSTRAINTS_OT_Solve)
     unregister_class(operators.MESH_CONSTRAINTS_OT_DeleteConstraint)
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices)
@@ -95,6 +99,7 @@ def unregister():
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXZCoord)
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixYZCoord)
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintParallel2Edges)
 
     # Properties
     unregister_class(props.MeshConstraintsContainer)

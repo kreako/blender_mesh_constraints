@@ -50,14 +50,3 @@ class MESH_CONSTRAINTS_OT_DrawConstraintsDefinition(DrawingOperator):
 
     _wm_property = "mesh_constraints_draw_constraints_definition"
     _callback = drawing.draw_constraints_definition
-
-
-
-class MESH_CONSTRAINTS_OT_DrawConstraintsViolation(DrawingOperator):
-    bl_idname = "mesh_constraints.draw_constraints_violation"
-    bl_label = "Draw constraints violation"
-    bl_description = "Draw constraints violation on top of the mesh"
-
-    _wm_property = "mesh_constraints_draw_constraints_violation"
-    _callback = drawing.draw_constraints_violation
-

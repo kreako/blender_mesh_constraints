@@ -13,10 +13,7 @@ if "constraints" in locals():
     importlib.reload(constraints)
 
 from . import base
-from .draw import (
-    MESH_CONSTRAINTS_OT_DrawConstraintsDefinition,
-    MESH_CONSTRAINTS_OT_DrawConstraintsViolation,
-)
+from .draw import MESH_CONSTRAINTS_OT_DrawConstraintsDefinition
 from .solve import MESH_CONSTRAINTS_OT_Solve
 from .constraints import (
     MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices,
@@ -27,6 +24,7 @@ from .constraints import (
     MESH_CONSTRAINTS_OT_ConstraintFixXZCoord,
     MESH_CONSTRAINTS_OT_ConstraintFixYZCoord,
     MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord,
+    MESH_CONSTRAINTS_OT_ConstraintParallel2Edges,
 )
 from .misc import MESH_CONSTRAINTS_OT_DeleteConstraint
 
@@ -43,7 +41,6 @@ def reload():
 __all__ = [
     "reload",
     "MESH_CONSTRAINTS_OT_DrawConstraintsDefinition",
-    "MESH_CONSTRAINTS_OT_DrawConstraintsViolation",
     "MESH_CONSTRAINTS_OT_Solve",
     "MESH_CONSTRAINTS_OT_DeleteConstraint",
     "MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices",
@@ -54,4 +51,5 @@ __all__ = [
     "MESH_CONSTRAINTS_OT_ConstraintFixXZCoord",
     "MESH_CONSTRAINTS_OT_ConstraintFixYZCoord",
     "MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord",
+    "MESH_CONSTRAINTS_OT_ConstraintParallel2Edges",
 ]

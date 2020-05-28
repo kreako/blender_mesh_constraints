@@ -1,4 +1,4 @@
-from ..props import ConstraintsKind, MeshConstraints
+from ..props import ConstraintsKind, MeshConstraints, constraints_kind_abbreviation
 
 def test_remove(mesh_constraints_data):
     mc = MeshConstraints(mesh_constraints_data)
@@ -185,3 +185,27 @@ def test_iter(mesh_constraints_data):
             assert c.y == 0
         else:
             assert False
+
+
+def test_parallel(mesh_constraints_data):
+    mc = MeshConstraints(mesh_constraints_data)
+    k = ConstraintsKind.PARALLEL
+    assert mc.exist_constraint(k, point0=2, point1=3, point2=5, point3=6) is None
+    assert mc.exist_constraint(k, point0=1, point1=3, point2=5, point3=6) is None
+    mc.add_parallel(2, 3, 5, 6)
+    assert mc.exist_constraint(k, point0=1, point1=3, point2=5, point3=6) is None
+    assert mc.exist_constraint(k, point0=2, point1=3, point2=5, point3=6) == 0
+    assert mc.exist_constraint(k, point0=3, point1=2, point2=5, point3=6) == 0
+    assert mc.exist_constraint(k, point0=3, point1=2, point2=6, point3=5) == 0
+    assert mc.exist_constraint(k, point0=2, point1=3, point2=6, point3=5) == 0
+    c = mc[0]
+    assert c.kind == ConstraintsKind.PARALLEL
+    assert c.point0 == 2
+    assert c.point1 == 3
+    assert c.point2 == 5
+    assert c.point3 == 6
+
+
+def test_constraints_abbreviation():
+    for k in ConstraintsKind:
+        assert k in constraints_kind_abbreviation

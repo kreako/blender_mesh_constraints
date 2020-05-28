@@ -38,7 +38,11 @@ class ConstraintOperator(base.MeshConstraintsOperator):
 
     def selected_verts(self):
         """Return list of selected vertex indices"""
-        return [v.index for v in self.bm.verts if v.select is True]
+        return [v.index for v in self.bm.verts if v.select]
+
+    def selected_edges(self):
+        """Return list of selected edges indices"""
+        return [e.index for e in self.bm.edges if e.select]
 
     def distance(self, point0, point1):
         """Compute a distance between 2 vertices of a mesh
@@ -264,5 +268,34 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord(ConstraintOperator):
             return self.warning("This constraint already exists...")
 
         self.mc.add_fix_xyz_coord(point, *self.bm.verts[point].co.xyz)
+
+        return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_ConstraintParallel2Edges(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_parallel_2_edges"
+    bl_label = "Parallel constraint between 2 edges"
+    bl_description = (
+        "Add a parallel constraint between 2 edges (select 4 vertices or 2 edges) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        edges_list = self.selected_edges()
+
+        if len(edges_list) != 2:
+            # TODO: add multiple constraints at once
+            return self.warning(
+                "I need you to select 2 edges or I'm not able to add a parallel constraint between 2 edges"
+            )
+
+        edge0, edge1 = edges_list
+        p0, p1 = [v.index for v in self.bm.edges[edge0].verts]
+        p2, p3 = [v.index for v in self.bm.edges[edge1].verts]
+
+        k = props.ConstraintsKind.PARALLEL
+        if self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3) is not None:
+            return self.warning("This constraint already exists...")
+
+        self.mc.add_parallel(p0, p1, p2, p3)
 
         return {"FINISHED"}

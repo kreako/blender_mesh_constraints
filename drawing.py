@@ -68,6 +68,12 @@ def draw_constraints_definition(context):
         elif c_kind == props.ConstraintsKind.FIX_XYZ_COORD:
             point = bm.verts[c.point].co
             _fix_xyz_coord(context, point, c)
+        elif c_kind == props.ConstraintsKind.PARALLEL:
+            point0 = bm.verts[c.point0].co
+            point1 = bm.verts[c.point1].co
+            point2 = bm.verts[c.point2].co
+            point3 = bm.verts[c.point3].co
+            _parallel(context, point0, point1, point2, point3, c)
         else:
             # Don't want to raise an error here but it deserves it
             pass
@@ -184,6 +190,62 @@ def _distance_between_2_vertices(context, p0_3d, p1_3d, constraint):
     shader.bind()
     shader.uniform_float("color", color)
     batch.draw(shader)
+
+
+def _parallel(context, p0_3d, p1_3d, p2_3d, p3_3d, constraint):
+    """Draw the constraint PARALLEL"""
+    region = context.region
+    rv3d = context.space_data.region_3d
+    o = context.edit_object
+
+    # Color change if OK, cross product should be 0
+    v0_3d = p1_3d - p0_3d
+    v1_3d = p3_3d - p2_3d
+    c = v0_3d.cross(v1_3d)
+    color = _select_color(constraint, equals(c.x, 0) and equals(c.y, 0) and equals(c.z, 0))
+
+    def _single_parallel(p0_3d, p1_3d):
+        p0_2d = location_3d_to_region_2d(region, rv3d, p0_3d)
+        p1_2d = location_3d_to_region_2d(region, rv3d, p1_3d)
+        if p0_2d is None or p1_2d is None:
+            # not in view
+            # TODO should I do something when one of the points is in view ?
+            return
+
+        v_3d = p1_3d - p0_3d
+        v_2d = p1_2d - p0_2d
+        # normal vector to v_3d pointing to outside of the object
+        # already normalized multiply to 1/10 of v_3d length so it hopefully
+        # stays in view
+        vn_3d = _normal_vector(o, p0_3d, p1_3d) * v_3d.length / 10
+
+        # Projected point on normal vector from p0_3d
+        p0_n_2d = location_3d_to_region_2d(region, rv3d, p0_3d + vn_3d)
+        if p0_n_2d is None:
+            # Not in view
+            return
+        # Now the point on (p0_2d - p0_n_2d) vector so (p0_n0_2d - p0_2d).length == EDGE_CONSTRAINT_SPACING
+        p0_n0_2d = p0_2d.lerp(
+            p0_n_2d, EDGE_CONSTRAINT_SPACING / (p0_n_2d - p0_2d).length
+        )
+
+        # Keep p0_n0_2d - p1_n0_2d parallel to p0_2d - p1_2d
+        p1_n0_2d = p0_n0_2d + v_2d
+
+        # Now text drawing
+        txt = "//"
+        font_id = 0
+        width, height = blf.dimensions(font_id, txt)
+        p_n0_middle = p0_n0_2d.lerp(p1_n0_2d, 0.5)
+        blf.position(
+            font_id, p_n0_middle[0] - width / 2, p_n0_middle[1] - height / 2, 0
+        )
+        blf.size(font_id, FONT_SIZE, 72)
+        blf.color(font_id, *color)
+        blf.draw(font_id, txt)
+
+    _single_parallel(p0_3d, p1_3d)
+    _single_parallel(p2_3d, p3_3d)
 
 
 def _fix_x_coord(context, point_3d, constraint):
@@ -328,10 +390,6 @@ def _format_distance(context, distance):
             return f"{inches:.2f} in"
     else:
         return f"{distance}"
-
-
-def draw_constraints_violation(context):
-    pass
 
 
 # TODO move all of this in preferences of the addon

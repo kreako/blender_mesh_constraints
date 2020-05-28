@@ -21,6 +21,7 @@ class ConstraintsKind(Enum):
     FIX_YZ_COORD = "6"
     FIX_XZ_COORD = "7"
     FIX_XYZ_COORD = "8"
+    PARALLEL = "9"
 
 
 # For kind EnumProperty
@@ -45,6 +46,7 @@ constraints_kind_abbreviation = {
     ConstraintsKind.FIX_YZ_COORD: "FYZ",
     ConstraintsKind.FIX_XZ_COORD: "FXZ",
     ConstraintsKind.FIX_XYZ_COORD: "FXYZ",
+    ConstraintsKind.PARALLEL: "PAR",
 }
 
 
@@ -55,6 +57,8 @@ class MeshConstraintProperties(PropertyGroup):
     )
     point0: IntProperty(name="point0", description="Point 0 of the constraint")
     point1: IntProperty(name="point1", description="Point 1 of the constraint")
+    point2: IntProperty(name="point2", description="Point 2 of the constraint")
+    point3: IntProperty(name="point3", description="Point 3 of the constraint")
     value0: FloatProperty(name="value0", description="Value 0 of the constraint")
     value1: FloatProperty(name="value1", description="Value 1 of the constraint")
     value2: FloatProperty(name="value2", description="Value 2 of the constraint")
@@ -119,6 +123,12 @@ class Constraint:
             self.data["y"] = constraint_properties.value1
             self.data["z"] = constraint_properties.value2
             self.nb_values = 3
+        elif self.kind == ConstraintsKind.PARALLEL:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.data["point2"] = constraint_properties.point2
+            self.data["point3"] = constraint_properties.point3
+            self.nb_values = 0
         else:
             raise Exception(f"Unknown kind of constraints {self.kind}")
 
@@ -187,6 +197,14 @@ class MeshConstraints:
                     point = kwargs["point"]
                     if c.point0 == point:
                         return index
+                elif c_kind == ConstraintsKind.PARALLEL:
+                    point0 = kwargs["point0"]
+                    point1 = kwargs["point1"]
+                    point2 = kwargs["point2"]
+                    point3 = kwargs["point3"]
+                    if (c.point0 == point0 and c.point1 == point1) or (c.point0 == point1 and c.point1 == point0):
+                        if (c.point2 == point2 and c.point3 == point3) or (c.point2 == point3 and c.point3 == point2):
+                            return index
                 else:
                     raise PropsException(
                         f"Internal error : Unknown constraint : {c_kind}"
@@ -290,3 +308,16 @@ class MeshConstraints:
         c.value0 = x
         c.value1 = y
         c.value2 = z
+
+    def add_parallel(self, point0, point1, point2, point3):
+        """Add a ConstraintsKind::PARALLEL with parameters
+        point0: vertex index of 1st point of the 1st vector
+        point1: vertex index of 2nd point of the 1st vector
+        point2: vertex index of 1st point of the 2nd vector
+        point3: vertex index of 2nd point of the 2nd vector"""
+        c = self._add()
+        c.kind = ConstraintsKind.PARALLEL.value
+        c.point0 = point0
+        c.point1 = point1
+        c.point2 = point2
+        c.point3 = point3

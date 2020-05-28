@@ -9,6 +9,8 @@ def mesh_constraints_data():
             self.kind = kwargs.get("kind", ConstraintsKind.UNKNOWN)
             self.point0 = kwargs.get("point0", -1)
             self.point1 = kwargs.get("point1", -1)
+            self.point2 = kwargs.get("point2", -1)
+            self.point3 = kwargs.get("point3", -1)
             self.value1 = kwargs.get("value1", 0.0)
             self.value2 = kwargs.get("value2", 0.0)
             self.value3 = kwargs.get("value3", 0.0)

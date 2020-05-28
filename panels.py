@@ -19,14 +19,6 @@ class MeshConstraintsPanelMain(MeshConstraintsPanelBase):
         row = box.row()
         row.operator("mesh_constraints.solve", text="Solve", icon="SNAP_ON")
 
-        # TODO display Solver error here ?
-        # o = context.object
-        # if o is not None and "MeshConstraintGenerator" in o:
-            # an object with constraints in it
-            # mc = props.MeshConstraints(o.MeshConstraintGenerator)
-            # if 
-
-        row = box.row()
         icon = (
             "PAUSE"
             if context.window_manager.mesh_constraints_draw_constraints_definition
@@ -35,14 +27,13 @@ class MeshConstraintsPanelMain(MeshConstraintsPanelBase):
         row.operator(
             "mesh_constraints.draw_constraints_definition", text="Definition", icon=icon
         )
-        icon = (
-            "PAUSE"
-            if context.window_manager.mesh_constraints_draw_constraints_violation
-            else "PLAY"
-        )
-        row.operator(
-            "mesh_constraints.draw_constraints_violation", text="Violation", icon=icon
-        )
+
+        # TODO display Solver error here ?
+        # o = context.object
+        # if o is not None and "MeshConstraintGenerator" in o:
+            # an object with constraints in it
+            # mc = props.MeshConstraints(o.MeshConstraintGenerator)
+            # if 
 
 
 class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
@@ -54,6 +45,7 @@ class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
         box = self.layout.box()
         row = box.row()
         row.operator("mesh_constraints.constraint_distance_2_vertices", text="Distance")
+        row.operator("mesh_constraints.constraint_parallel_2_edges", text="Parallel")
         row = box.row()
         row.operator("mesh_constraints.constraint_fix_xyz_coord", text="XYZ")
         row.operator("mesh_constraints.constraint_fix_x_coord", text="X")
