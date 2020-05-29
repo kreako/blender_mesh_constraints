@@ -23,6 +23,9 @@ class ConstraintsKind(Enum):
     FIX_XYZ_COORD = "8"
     PARALLEL = "9"
     PERPENDICULAR = "10"
+    ON_X = "11"
+    ON_Y = "12"
+    ON_Z = "13"
 
 
 # For kind EnumProperty
@@ -49,6 +52,9 @@ constraints_kind_abbreviation = {
     ConstraintsKind.FIX_XYZ_COORD: "FixXYZ",
     ConstraintsKind.PARALLEL: "Para.",
     ConstraintsKind.PERPENDICULAR: "Perp.",
+    ConstraintsKind.ON_X: "On X",
+    ConstraintsKind.ON_Y: "On Y",
+    ConstraintsKind.ON_Z: "On Z",
 }
 
 
@@ -64,7 +70,9 @@ class MeshConstraintProperties(PropertyGroup):
     value0: FloatProperty(name="value0", description="Value 0 of the constraint")
     value1: FloatProperty(name="value1", description="Value 1 of the constraint")
     value2: FloatProperty(name="value2", description="Value 2 of the constraint")
-    in_error: BoolProperty(name="in_error", description="Constraint in error after solve")
+    in_error: BoolProperty(
+        name="in_error", description="Constraint in error after solve"
+    )
     # View related
     view: BoolProperty(name="view", description="Show/hide in 3D view", default=True)
     show_details: BoolProperty(
@@ -137,6 +145,18 @@ class Constraint:
             self.data["point2"] = constraint_properties.point2
             self.data["point3"] = constraint_properties.point3
             self.nb_values = 0
+        elif self.kind == ConstraintsKind.ON_X:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.nb_values = 0
+        elif self.kind == ConstraintsKind.ON_Y:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.nb_values = 0
+        elif self.kind == ConstraintsKind.ON_Z:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.nb_values = 0
         else:
             raise Exception(f"Unknown kind of constraints {self.kind}")
 
@@ -184,7 +204,12 @@ class MeshConstraints:
             if c_kind == kind:
                 # This is the same type of constraint I'm looking for
                 # so continue the search
-                if c_kind == ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
+                if c_kind in (
+                    ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES,
+                    ConstraintsKind.ON_X,
+                    ConstraintsKind.ON_Y,
+                    ConstraintsKind.ON_Z,
+                ):
                     # TODO error handling on kwarg access ?
                     point0 = kwargs["point0"]
                     point1 = kwargs["point1"]
@@ -205,13 +230,20 @@ class MeshConstraints:
                     point = kwargs["point"]
                     if c.point0 == point:
                         return index
-                elif c_kind in (ConstraintsKind.PARALLEL, ConstraintsKind.PERPENDICULAR):
+                elif c_kind in (
+                    ConstraintsKind.PARALLEL,
+                    ConstraintsKind.PERPENDICULAR,
+                ):
                     point0 = kwargs["point0"]
                     point1 = kwargs["point1"]
                     point2 = kwargs["point2"]
                     point3 = kwargs["point3"]
-                    if (c.point0 == point0 and c.point1 == point1) or (c.point0 == point1 and c.point1 == point0):
-                        if (c.point2 == point2 and c.point3 == point3) or (c.point2 == point3 and c.point3 == point2):
+                    if (c.point0 == point0 and c.point1 == point1) or (
+                        c.point0 == point1 and c.point1 == point0
+                    ):
+                        if (c.point2 == point2 and c.point3 == point3) or (
+                            c.point2 == point3 and c.point3 == point2
+                        ):
                             return index
                 else:
                     raise PropsException(
@@ -342,3 +374,30 @@ class MeshConstraints:
         c.point1 = point1
         c.point2 = point2
         c.point3 = point3
+
+    def add_on_x(self, point0, point1):
+        """Add a ConstraintsKind::ON_X with parameters
+        point0: vertex index of 1st point of the vector
+        point1: vertex index of 2nd point of the vector"""
+        c = self._add()
+        c.kind = ConstraintsKind.ON_X.value
+        c.point0 = point0
+        c.point1 = point1
+
+    def add_on_y(self, point0, point1):
+        """Add a ConstraintsKind::ON_X with parameters
+        point0: vertex index of 1st point of the vector
+        point1: vertex index of 2nd point of the vector"""
+        c = self._add()
+        c.kind = ConstraintsKind.ON_Y.value
+        c.point0 = point0
+        c.point1 = point1
+
+    def add_on_z(self, point0, point1):
+        """Add a ConstraintsKind::ON_X with parameters
+        point0: vertex index of 1st point of the vector
+        point1: vertex index of 2nd point of the vector"""
+        c = self._add()
+        c.kind = ConstraintsKind.ON_Z.value
+        c.point0 = point0
+        c.point1 = point1

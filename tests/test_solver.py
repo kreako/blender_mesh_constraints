@@ -550,3 +550,102 @@ def test_solver_perpendicular():
     d = v0.dot(v1)
 
     assert equal_float(d, 0)
+
+
+def test_solver_on_x():
+    s = Solver(
+        [
+            MeshPoint(0, Vector3(0, 0, 0)),
+            MeshPoint(1, Vector3(10, 10, 10)),
+        ]
+    )
+
+    s.fix_x(42, 0, 0)
+    s.fix_y(42, 0, 0)
+    s.fix_z(42, 0, 0)
+
+    s.on_x(42, 0, 1)
+
+    ret = s.solve()
+
+    assert ret["solved"]
+    points = ret["points"]
+    assert len(points) == 2
+    p0 = points[0]
+    p1 = points[1]
+
+    assert p0.index == 0
+    assert p1.index == 1
+
+    assert equal_float(p0.x, 0)
+    assert equal_float(p0.y, 0)
+    assert equal_float(p0.z, 0)
+
+    assert equal_float(p1.y, p0.y)
+    assert equal_float(p1.z, p0.z)
+
+
+def test_solver_on_y():
+    s = Solver(
+        [
+            MeshPoint(0, Vector3(0, 0, 0)),
+            MeshPoint(1, Vector3(10, 10, 10)),
+        ]
+    )
+
+    s.fix_x(42, 0, 0)
+    s.fix_y(42, 0, 0)
+    s.fix_z(42, 0, 0)
+
+    s.on_y(42, 0, 1)
+
+    ret = s.solve()
+
+    assert ret["solved"]
+    points = ret["points"]
+    assert len(points) == 2
+    p0 = points[0]
+    p1 = points[1]
+
+    assert p0.index == 0
+    assert p1.index == 1
+
+    assert equal_float(p0.x, 0)
+    assert equal_float(p0.y, 0)
+    assert equal_float(p0.z, 0)
+
+    assert equal_float(p1.x, p0.x)
+    assert equal_float(p1.z, p0.z)
+
+
+def test_solver_on_z():
+    s = Solver(
+        [
+            MeshPoint(0, Vector3(0, 0, 0)),
+            MeshPoint(1, Vector3(10, 10, 10)),
+        ]
+    )
+
+    s.fix_x(42, 0, 0)
+    s.fix_y(42, 0, 0)
+    s.fix_z(42, 0, 0)
+
+    s.on_z(42, 0, 1)
+
+    ret = s.solve()
+
+    assert ret["solved"]
+    points = ret["points"]
+    assert len(points) == 2
+    p0 = points[0]
+    p1 = points[1]
+
+    assert p0.index == 0
+    assert p1.index == 1
+
+    assert equal_float(p0.x, 0)
+    assert equal_float(p0.y, 0)
+    assert equal_float(p0.z, 0)
+
+    assert equal_float(p1.x, p0.x)
+    assert equal_float(p1.y, p0.y)

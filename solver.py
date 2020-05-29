@@ -264,7 +264,11 @@ class NewtonSolver:
 
         # Remove substitutes from params
         for param in substitutes:
-            self.params.remove(param)
+            try:
+                self.params.remove(param)
+            except ValueError:
+                # Already removed so it's OK
+                pass
 
         # return number of substitution done
         return len(substitutes)
@@ -513,6 +517,27 @@ class Solver:
 
         # dot product of v0 and v1 should be 0
         self._add_equation(constraint, v0x * v1x + v0y * v1y + v0z * v1z)
+
+    def on_x(self, constraint, point0, point1):
+        """Add a on X constraint for vector p0-p1"""
+        p0 = self.points[point0]
+        p1 = self.points[point1]
+        self._add_equation(constraint, p0.y_param - p1.y_param)
+        self._add_equation(constraint, p0.z_param - p1.z_param)
+
+    def on_y(self, constraint, point0, point1):
+        """Add a on Y constraint for vector p0-p1"""
+        p0 = self.points[point0]
+        p1 = self.points[point1]
+        self._add_equation(constraint, p0.x_param - p1.x_param)
+        self._add_equation(constraint, p0.z_param - p1.z_param)
+
+    def on_z(self, constraint, point0, point1):
+        """Add a on Z constraint for vector p0-p1"""
+        p0 = self.points[point0]
+        p1 = self.points[point1]
+        self._add_equation(constraint, p0.x_param - p1.x_param)
+        self._add_equation(constraint, p0.y_param - p1.y_param)
 
     def solve(self):
         """Solve and return an object representing the solve operation with

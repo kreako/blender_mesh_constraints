@@ -330,3 +330,96 @@ class MESH_CONSTRAINTS_OT_ConstraintPerpendicular2Edges(ConstraintOperator):
         self.mc.add_perpendicular(p0, p1, p2, p3)
 
         return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_ConstraintOnX(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_on_x"
+    bl_label = "Add an On X constraint"
+    bl_description = (
+        "Add a constraint to make an edge parallel to X axis (select 2 vertices or 1 edge) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        # TODO: add multiple constraints at once
+        if "EDGE" in self.bm.select_mode:
+            edges_list = self.selected_edges()
+            if len(edges_list) != 1:
+                return self.warning(
+                    "I need you to select 1 edge or I'm not able to add an On X constraint for an edge"
+                )
+            p0, p1 = [v.index for v in self.bm.edges[edges_list[0]].verts]
+        else:
+            vertices_list = self.selected_verts()
+            if len(vertices_list) != 2:
+                return self.warning(
+                    "I need you to select 2 vertices or I'm not able to add an On X constraint for an edge"
+                )
+            p0, p1 = vertices_list
+
+        k = props.ConstraintsKind.ON_X
+        if self.mc.exist_constraint(k, point0=p0, point1=p1) is not None:
+            return self.warning("This constraint already exists...")
+        self.mc.add_on_x(p0, p1)
+        return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_ConstraintOnY(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_on_y"
+    bl_label = "Add an On Y constraint"
+    bl_description = (
+        "Add a constraint to make an edge parallel to Y axis (select 2 vertices or 1 edge) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        # TODO: add multiple constraints at once
+        if "EDGE" in self.bm.select_mode:
+            edges_list = self.selected_edges()
+            if len(edges_list) != 1:
+                return self.warning(
+                    "I need you to select 1 edge or I'm not able to add an On Y constraint for an edge"
+                )
+            p0, p1 = [v.index for v in self.bm.edges[edges_list[0]].verts]
+        else:
+            vertices_list = self.selected_verts()
+            if len(vertices_list) != 2:
+                return self.warning(
+                    "I need you to select 2 vertices or I'm not able to add an On Y constraint for an edge"
+                )
+            p0, p1 = vertices_list
+
+        k = props.ConstraintsKind.ON_Y
+        if self.mc.exist_constraint(k, point0=p0, point1=p1) is not None:
+            return self.warning("This constraint already exists...")
+        self.mc.add_on_y(p0, p1)
+        return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_ConstraintOnZ(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_on_z"
+    bl_label = "Add an On Z constraint"
+    bl_description = (
+        "Add a constraint to make an edge parallel to Z axis (select 2 vertices or 1 edge) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        # TODO: add multiple constraints at once
+        if "EDGE" in self.bm.select_mode:
+            edges_list = self.selected_edges()
+            if len(edges_list) != 1:
+                return self.warning(
+                    "I need you to select 1 edge or I'm not able to add an On Z constraint for an edge"
+                )
+            p0, p1 = [v.index for v in self.bm.edges[edges_list[0]].verts]
+        else:
+            vertices_list = self.selected_verts()
+            if len(vertices_list) != 2:
+                return self.warning(
+                    "I need you to select 2 vertices or I'm not able to add an On Z constraint for an edge"
+                )
+            p0, p1 = vertices_list
+
+        k = props.ConstraintsKind.ON_Z
+        if self.mc.exist_constraint(k, point0=p0, point1=p1) is not None:
+            return self.warning("This constraint already exists...")
+        self.mc.add_on_z(p0, p1)
+        return {"FINISHED"}

@@ -14,7 +14,7 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
     def poll(cls, context):
         # A selected mesh in edit mode : I'm in, but not for the rest
         o = context.object
-        return o is not None and o.type == "MESH" and context.mode == "EDIT_MESH"
+        return o is not None and o.type == "MESH" and context.mode == "EDIT_MESH" and "MeshConstraintGenerator" in o and len(o.MeshConstraintGenerator[0].constraints) > 0
 
     def execute(self, context):
         if context.area.type != "VIEW_3D":
@@ -59,6 +59,12 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
                 s.parallel(index, c.point0, c.point1, c.point2, c.point3)
             elif c.kind == ConstraintsKind.PERPENDICULAR:
                 s.perpendicular(index, c.point0, c.point1, c.point2, c.point3)
+            elif c.kind == ConstraintsKind.ON_X:
+                s.on_x(index, c.point0, c.point1)
+            elif c.kind == ConstraintsKind.ON_Y:
+                s.on_y(index, c.point0, c.point1)
+            elif c.kind == ConstraintsKind.ON_Z:
+                s.on_z(index, c.point0, c.point1)
             else:
                 raise Exception(f"Unknown kind of constraints {c.kind}")
 

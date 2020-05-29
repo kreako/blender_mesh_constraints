@@ -228,3 +228,48 @@ def test_perpendicular(mesh_constraints_data):
     assert c.point1 == 3
     assert c.point2 == 5
     assert c.point3 == 6
+
+
+def test_on_x(mesh_constraints_data):
+    mc = MeshConstraints(mesh_constraints_data)
+    k = ConstraintsKind.ON_X
+    assert mc.exist_constraint(k, point0=2, point1=3) is None
+    assert mc.exist_constraint(k, point0=1, point1=3) is None
+    mc.add_on_x(2, 3)
+    assert mc.exist_constraint(k, point0=1, point1=3) is None
+    assert mc.exist_constraint(k, point0=2, point1=3) == 0
+    assert mc.exist_constraint(k, point0=3, point1=2) == 0
+    c = mc[0]
+    assert c.kind == ConstraintsKind.ON_X
+    assert c.point0 == 2
+    assert c.point1 == 3
+
+
+def test_on_y(mesh_constraints_data):
+    mc = MeshConstraints(mesh_constraints_data)
+    k = ConstraintsKind.ON_Y
+    assert mc.exist_constraint(k, point0=2, point1=3) is None
+    assert mc.exist_constraint(k, point0=1, point1=3) is None
+    mc.add_on_y(2, 3)
+    assert mc.exist_constraint(k, point0=1, point1=3) is None
+    assert mc.exist_constraint(k, point0=2, point1=3) == 0
+    assert mc.exist_constraint(k, point0=3, point1=2) == 0
+    c = mc[0]
+    assert c.kind == ConstraintsKind.ON_Y
+    assert c.point0 == 2
+    assert c.point1 == 3
+
+
+def test_on_z(mesh_constraints_data):
+    mc = MeshConstraints(mesh_constraints_data)
+    k = ConstraintsKind.ON_Z
+    assert mc.exist_constraint(k, point0=2, point1=3) is None
+    assert mc.exist_constraint(k, point0=1, point1=3) is None
+    mc.add_on_z(2, 3)
+    assert mc.exist_constraint(k, point0=1, point1=3) is None
+    assert mc.exist_constraint(k, point0=2, point1=3) == 0
+    assert mc.exist_constraint(k, point0=3, point1=2) == 0
+    c = mc[0]
+    assert c.kind == ConstraintsKind.ON_Z
+    assert c.point0 == 2
+    assert c.point1 == 3
