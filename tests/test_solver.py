@@ -357,8 +357,7 @@ def test_newton_solver_solve_by_substitution():
     ]
     initial_values = {x: 0, y: 0}
     s = NewtonSolver(equations, initial_values)
-    assert 1 == s.solve_by_substitution()
-    assert 1 == s.solve_by_substitution()
+    s.solve_by_substitution()
     assert s.values[x] == 0
     assert s.values[y] == 0
     s.reduce_substitution()
@@ -428,10 +427,7 @@ def test_solver_parallel_fix():
 
 
 def test_solver_basic_distance():
-    s = Solver([
-        MeshPoint(0, Vector3(10, 10, 10)),
-        MeshPoint(1, Vector3(20, 20, 20)),
-    ])
+    s = Solver([MeshPoint(0, Vector3(10, 10, 10)), MeshPoint(1, Vector3(20, 20, 20)),])
     s.distance_2_vertices(42, 0, 1, 30)
     ret = s.solve()
     assert ret["solved"]
@@ -444,10 +440,7 @@ def test_solver_basic_distance():
 
 
 def test_solver_basic_distance_fix():
-    s = Solver([
-        MeshPoint(0, Vector3(10, 10, 10)),
-        MeshPoint(1, Vector3(20, 20, 20)),
-    ])
+    s = Solver([MeshPoint(0, Vector3(10, 10, 10)), MeshPoint(1, Vector3(20, 20, 20)),])
     s.distance_2_vertices(42, 0, 1, 30)
     s.fix_x(42, 0, 10)
     s.fix_z(42, 1, 20)
@@ -467,10 +460,7 @@ def test_solver_basic_distance_fix():
 
 
 def test_solver_unsolvable():
-    s = Solver([
-        MeshPoint(0, Vector3(10, 10, 10)),
-        MeshPoint(1, Vector3(20, 20, 20)),
-    ])
+    s = Solver([MeshPoint(0, Vector3(10, 10, 10)), MeshPoint(1, Vector3(20, 20, 20)),])
     s.distance_2_vertices(42, 0, 1, 30)
     s.fix_x(43, 0, 10)
     s.fix_y(43, 0, 10)
@@ -483,10 +473,7 @@ def test_solver_unsolvable():
 
 
 def test_solver_low_rank():
-    s = Solver([
-        MeshPoint(0, Vector3(10, 10, 10)),
-        MeshPoint(1, Vector3(20, 20, 20)),
-    ])
+    s = Solver([MeshPoint(0, Vector3(10, 10, 10)), MeshPoint(1, Vector3(20, 20, 20)),])
     s.distance_2_vertices(42, 0, 1, 30)
     s.distance_2_vertices(43, 0, 1, 20)
     ret = s.solve()
@@ -553,12 +540,7 @@ def test_solver_perpendicular():
 
 
 def test_solver_on_x():
-    s = Solver(
-        [
-            MeshPoint(0, Vector3(0, 0, 0)),
-            MeshPoint(1, Vector3(10, 10, 10)),
-        ]
-    )
+    s = Solver([MeshPoint(0, Vector3(0, 0, 0)), MeshPoint(1, Vector3(10, 10, 10)),])
 
     s.fix_x(42, 0, 0)
     s.fix_y(42, 0, 0)
@@ -586,12 +568,7 @@ def test_solver_on_x():
 
 
 def test_solver_on_y():
-    s = Solver(
-        [
-            MeshPoint(0, Vector3(0, 0, 0)),
-            MeshPoint(1, Vector3(10, 10, 10)),
-        ]
-    )
+    s = Solver([MeshPoint(0, Vector3(0, 0, 0)), MeshPoint(1, Vector3(10, 10, 10)),])
 
     s.fix_x(42, 0, 0)
     s.fix_y(42, 0, 0)
@@ -619,12 +596,7 @@ def test_solver_on_y():
 
 
 def test_solver_on_z():
-    s = Solver(
-        [
-            MeshPoint(0, Vector3(0, 0, 0)),
-            MeshPoint(1, Vector3(10, 10, 10)),
-        ]
-    )
+    s = Solver([MeshPoint(0, Vector3(0, 0, 0)), MeshPoint(1, Vector3(10, 10, 10)),])
 
     s.fix_x(42, 0, 0)
     s.fix_y(42, 0, 0)
@@ -649,3 +621,80 @@ def test_solver_on_z():
 
     assert equal_float(p1.x, p0.x)
     assert equal_float(p1.y, p0.y)
+
+
+def test_solver_avoid_loop_in_substitutes():
+    s = Solver(
+        [
+            MeshPoint(0, Vector3(-1.1291875839233398, -1.1657862663269043, -1.2977023124694824)),
+            MeshPoint(1, Vector3(-1.1291875839233398, -1.1657862663269043, 0.8831915855407715)),
+            MeshPoint(2, Vector3(-1.1291875839233398, 0.6939811706542969, -0.9495291113853455)),
+            MeshPoint(3, Vector3(-1.1291875839233398, 0.6939811706542969, 1.0)),
+            MeshPoint(4, Vector3(1.5113141536712646, -1.1657862663269043, -1.2977023124694824)),
+            MeshPoint(5, Vector3(1.5113141536712646, -1.1657862663269043, -1.1214728355407715)),
+            MeshPoint(6, Vector3(1.5113141536712646, 0.6939811706542969, -1.2977023124694824)),
+            MeshPoint(7, Vector3(1.5113141536712646, 0.6939811706542969, -0.7355250120162964)),
+            MeshPoint(8, Vector3(0.17407408356666565, 0.8677473068237305, -1.465881109237671)),
+        ]
+    )
+
+    s.on_z(0, 5, 4)
+    s.fix_x(1, 6, s.points[6].x)
+    s.fix_y(1, 6, s.points[6].y)
+    s.fix_z(1, 6, s.points[6].z)
+    s.on_z(2, 7, 6)
+    s.on_y(3, 4, 6)
+    s.on_y(4, 7, 5)
+    s.on_z(5, 3, 2)
+    s.on_x(6, 3, 7)
+    s.on_y(7, 1, 3)
+    s.parallel(8, 0, 1, 3, 2)
+    s.on_x(9, 5, 1)
+    s.parallel(10, 0, 4, 5, 1)
+
+    ret = s.solve()
+
+    assert ret["solved"]
+    points = ret["points"]
+    # 0
+    assert equal_float(points[5].x, points[4].x)
+    assert equal_float(points[5].y, points[4].y)
+    # 1
+    assert equal_float(points[6].x, 1.5113141536712646)
+    assert equal_float(points[6].y, 0.6939811706542969)
+    assert equal_float(points[6].z, -1.2977023124694824)
+    # 2
+    assert equal_float(points[7].x, points[6].x)
+    assert equal_float(points[7].y, points[6].y)
+    # 3
+    assert equal_float(points[4].x, points[6].x)
+    assert equal_float(points[4].z, points[6].z)
+    # 4
+    assert equal_float(points[7].x, points[5].x)
+    assert equal_float(points[7].z, points[5].z)
+    # 5
+    assert equal_float(points[3].x, points[2].x)
+    assert equal_float(points[3].y, points[2].y)
+    # 6
+    assert equal_float(points[3].z, points[7].z)
+    assert equal_float(points[3].y, points[7].y)
+    # 7
+    assert equal_float(points[3].z, points[1].z)
+    assert equal_float(points[3].x, points[1].x)
+    # 8 parallel means cross product = 0
+    v0 = Vector3(*points[0].xyz) - Vector3(*points[1].xyz)
+    v1 = Vector3(*points[3].xyz) - Vector3(*points[2].xyz)
+    cross = v0.cross(v1)
+    assert equal_float(cross.x, 0)
+    assert equal_float(cross.y, 0)
+    assert equal_float(cross.z, 0)
+    # 9
+    assert equal_float(points[5].y, points[1].y)
+    assert equal_float(points[5].z, points[1].z)
+    # 10 parallel means cross product = 0
+    v0 = Vector3(*points[0].xyz) - Vector3(*points[4].xyz)
+    v1 = Vector3(*points[5].xyz) - Vector3(*points[1].xyz)
+    cross = v0.cross(v1)
+    assert equal_float(cross.x, 0)
+    assert equal_float(cross.y, 0)
+    assert equal_float(cross.z, 0)

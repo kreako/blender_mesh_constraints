@@ -213,67 +213,75 @@ class NewtonSolver:
 
     def solve_by_substitution(self):
         # Build dict of possible substitute
-        substitutes = {}
-        for equation in self.equations:
-            # Looking for equations in form of
-            # * x - y with x and y both symbols
-            # * x - 42 with x symbol, 42 a values
-            if not equation.is_Add:
-                continue
-            coeff, args = equation.as_coeff_add()
-            if len(args) == 1:
-                # This is maybe a x - 42 type with x in args and 42 in coeff
-                if coeff.is_real:
-                    a0 = args[0]
-                    if a0.is_symbol:
+        while True:
+            sym = None
+            value = None
+            for equation in self.equations:
+                # Looking for equations in form of
+                # * x - y with x and y both symbols
+                # * x - 42 with x symbol, 42 a values
+                if not equation.is_Add:
+                    continue
+                coeff, args = equation.as_coeff_add()
+                if len(args) == 1:
+                    # This is maybe a x - 42 type with x in args and 42 in coeff
+                    if coeff.is_real:
+                        a0 = args[0]
+                        if a0.is_symbol:
+                            # We have a winner
+                            sym = args[0]
+                            value = -coeff
+                            break
+                        if a0.is_Mul:
+                            # Is this 42 + mul_coeff * x ?
+                            mul_coeff, mul_args = a0.as_coeff_mul()
+                            if len(mul_args) != 1:
+                                continue
+                            mul_sym = mul_args[0]
+                            if not mul_sym.is_symbol:
+                                continue
+                            # We have a winner
+                            sym = mul_sym
+                            value = -coeff / mul_coeff
+                            break
+                elif len(args) == 2:
+                    # This could be a x - 42.3 or a x - y
+                    if coeff != 0:
+                        continue
+                    a0, a1 = args
+                    if a0.is_real and a1.is_symbol:
                         # We have a winner
-                        substitutes[args[0]] = -coeff
-                    if a0.is_Mul:
-                        # Is this 42 + mul_coeff * x ?
-                        mul_coeff, mul_args = a0.as_coeff_mul()
+                        sym = a1
+                        value = -a0
+                        break
+                    if a0.is_symbol and a1.is_Mul:
+                        # Is this x - mul_coeff * y ?
+                        mul_coeff, mul_args = a1.as_coeff_mul()
                         if len(mul_args) != 1:
                             continue
                         mul_sym = mul_args[0]
                         if not mul_sym.is_symbol:
                             continue
                         # We have a winner
-                        substitutes[mul_sym] = -coeff / mul_coeff
-            elif len(args) == 2:
-                # This could be a x - 42.3 or a x - y
-                if coeff != 0:
-                    continue
-                a0, a1 = args
-                if a0.is_real and a1.is_symbol:
-                    # We have a winner
-                    substitutes[a1] = -a0
-                if a0.is_symbol and a1.is_Mul:
-                    # Is this x - mul_coeff * y ?
-                    mul_coeff, mul_args = a1.as_coeff_mul()
-                    if len(mul_args) != 1:
-                        continue
-                    mul_sym = mul_args[0]
-                    if not mul_sym.is_symbol:
-                        continue
-                    # We have a winner
-                    substitutes[a0] = -mul_coeff * mul_sym
+                        sym = a0
+                        value = -mul_coeff * mul_sym
+                        break
+            else:
+                break
 
-        # Now substitute
-        for i in range(len(self.equations)):
-            self.equations[i] = self.equations[i].subs(substitutes)
+            # Now substitute
+            for i in range(len(self.equations)):
+                self.equations[i] = self.equations[i].subs({sym: value})
 
-        # Register substitutes for futures use
-        self.substitutes.update(substitutes)
+            # Register substitutes for futures use
+            self.substitutes[sym] = value
 
-        # Remove substitutes from params
-        for param in substitutes:
+            # Try to remove from param
             try:
-                self.params.remove(param)
+                self.params.remove(sym)
             except ValueError:
                 # Already removed so it's OK
                 pass
-
-        # return number of substitution done
-        return len(substitutes)
 
     def _solve(self):
         # Prepare matrix for solving storage
@@ -364,11 +372,8 @@ class NewtonSolver:
     def solve(self):
         # Substitutes all I can first
         log.logger().debug("start")
-        while True:
-            i = self.solve_by_substitution()
-            log.logger().debug(f"{i} {self.substitutes}")
-            if i == 0:
-                break
+        self.solve_by_substitution()
+        log.logger().debug(f"{self.substitutes}")
         log.logger().debug(f"{self.equations}")
         # Non substituted parts
         if len(self.equations) > 0:
