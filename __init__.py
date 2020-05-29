@@ -28,6 +28,7 @@ from bpy.props import CollectionProperty, BoolProperty
 from bpy.utils import register_class, unregister_class
 from bpy.types import WindowManager
 
+from . import log
 from . import props
 from . import drawing
 from . import operators
@@ -45,9 +46,11 @@ if reload:
     operators.reload()
     importlib.reload(panels)
     importlib.reload(solver)
+    importlib.reload(log)
 
 
 def register():
+    log.logger().debug("Start")
     # Properties
     WindowManager.mesh_constraints_draw_constraints_definition = BoolProperty(
         default=False
@@ -82,10 +85,11 @@ def register():
     register_class(panels.MeshConstraintsPanelAdd)
     register_class(panels.MeshConstraintsPanelItems)
 
-    print("register", props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES)
+    log.logger().debug("End")
 
 
 def unregister():
+    log.logger().debug("Start")
     # Panels
     unregister_class(panels.MeshConstraintsPanelAdd)
     unregister_class(panels.MeshConstraintsPanelItems)
@@ -112,4 +116,4 @@ def unregister():
     # Properties
     unregister_class(props.MeshConstraintsContainer)
     unregister_class(props.MeshConstraintProperties)
-    print("unregister")
+    log.logger().debug("End")
