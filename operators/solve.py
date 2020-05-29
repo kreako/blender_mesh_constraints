@@ -3,6 +3,7 @@ import bmesh
 from . import base
 from .. import props
 from .. import solver
+from .. import log
 
 
 class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
@@ -24,6 +25,8 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
         if "MeshConstraintGenerator" not in o:
             return self.warning("I'm not able to find constraints on this mesh")
 
+        log.logger().debug("start")
+
         mesh = o.data
         bm = bmesh.from_edit_mesh(mesh)
         mc = props.MeshConstraints(o.MeshConstraintGenerator)
@@ -34,6 +37,7 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
 
         s = solver.Solver([solver.MeshPoint(v.index, v.co) for v in bm.verts])
         for index, c in enumerate(mc):
+            log.logger().debug(f"{index}: {c}")
             if c.kind == ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
                 s.distance_2_vertices(index, c.point0, c.point1, c.distance)
             elif c.kind == ConstraintsKind.FIX_X_COORD:
@@ -69,6 +73,7 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
                 raise Exception(f"Unknown kind of constraints {c.kind}")
 
         solution = s.solve()
+        log.logger().debug(f"solution: {solution}")
 
         if solution["solved"]:
             for point in solution["points"]:
@@ -76,13 +81,14 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
             bmesh.update_edit_mesh(mesh, loop_triangles=True, destructive=False)
             self.info("Solved !")
             context.area.tag_redraw()
+            log.logger().debug("end ok")
             return {"FINISHED"}
         else:
-            print(solution)
             nb_in_errors = len(solution["equations_in_error"])
             for in_error in solution["equations_in_error"]:
                 mc.set_in_error(in_error)
             context.area.tag_redraw()
+            log.logger().debug("end nok")
             if nb_in_errors:
                 return self.error(
                     f"Not Solved : Constraints did not converged, {nb_in_errors} conflicting..."
