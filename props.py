@@ -39,16 +39,16 @@ constraints_kind_display = {
 # For abbreviation display
 constraints_kind_abbreviation = {
     ConstraintsKind.UNKNOWN: "?",
-    ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES: "D2",
-    ConstraintsKind.FIX_X_COORD: "FX",
-    ConstraintsKind.FIX_Y_COORD: "FY",
-    ConstraintsKind.FIX_Z_COORD: "FZ",
-    ConstraintsKind.FIX_XY_COORD: "FXY",
-    ConstraintsKind.FIX_YZ_COORD: "FYZ",
-    ConstraintsKind.FIX_XZ_COORD: "FXZ",
-    ConstraintsKind.FIX_XYZ_COORD: "FXYZ",
-    ConstraintsKind.PARALLEL: "PARA",
-    ConstraintsKind.PERPENDICULAR: "PERP",
+    ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES: "Dist.",
+    ConstraintsKind.FIX_X_COORD: "FixX",
+    ConstraintsKind.FIX_Y_COORD: "FixY",
+    ConstraintsKind.FIX_Z_COORD: "FixZ",
+    ConstraintsKind.FIX_XY_COORD: "FixXY",
+    ConstraintsKind.FIX_YZ_COORD: "FixYZ",
+    ConstraintsKind.FIX_XZ_COORD: "FixXZ",
+    ConstraintsKind.FIX_XYZ_COORD: "FixXYZ",
+    ConstraintsKind.PARALLEL: "Para.",
+    ConstraintsKind.PERPENDICULAR: "Perp.",
 }
 
 

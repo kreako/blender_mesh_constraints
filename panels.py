@@ -44,18 +44,18 @@ class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
     def draw(self, context):
         box = self.layout.box()
         row = box.row()
-        row.operator("mesh_constraints.constraint_distance_2_vertices", text="Distance")
-        row.operator("mesh_constraints.constraint_parallel_2_edges", text="Parallel")
-        row.operator("mesh_constraints.constraint_perpendicular_2_edges", text="Perpendicular")
+        row.operator("mesh_constraints.constraint_distance_2_vertices", text=props.constraints_kind_abbreviation[props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES])
+        row.operator("mesh_constraints.constraint_parallel_2_edges", text=props.constraints_kind_abbreviation[props.ConstraintsKind.PARALLEL])
+        row.operator("mesh_constraints.constraint_perpendicular_2_edges", text=props.constraints_kind_abbreviation[props.ConstraintsKind.PERPENDICULAR])
         row = box.row()
-        row.operator("mesh_constraints.constraint_fix_xyz_coord", text="XYZ")
-        row.operator("mesh_constraints.constraint_fix_x_coord", text="X")
-        row.operator("mesh_constraints.constraint_fix_y_coord", text="Y")
-        row.operator("mesh_constraints.constraint_fix_z_coord", text="Z")
-        row = box.row()
-        row.operator("mesh_constraints.constraint_fix_xy_coord", text="XY")
-        row.operator("mesh_constraints.constraint_fix_xz_coord", text="XZ")
-        row.operator("mesh_constraints.constraint_fix_yz_coord", text="YZ")
+        row.operator("mesh_constraints.constraint_fix_xyz_coord", text=props.constraints_kind_abbreviation[props.ConstraintsKind.FIX_XYZ_COORD])
+        row.operator("mesh_constraints.constraint_fix_x_coord", text=props.constraints_kind_abbreviation[props.ConstraintsKind.FIX_X_COORD])
+        row.operator("mesh_constraints.constraint_fix_y_coord", text=props.constraints_kind_abbreviation[props.ConstraintsKind.FIX_Y_COORD])
+        row.operator("mesh_constraints.constraint_fix_z_coord", text=props.constraints_kind_abbreviation[props.ConstraintsKind.FIX_Z_COORD])
+        # row = box.row()
+        # row.operator("mesh_constraints.constraint_fix_xy_coord", text="XY")
+        # row.operator("mesh_constraints.constraint_fix_xz_coord", text="XZ")
+        # row.operator("mesh_constraints.constraint_fix_yz_coord", text="YZ")
 
 
 class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
@@ -125,6 +125,16 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                     box.row(align=True).prop(c.raw, "value0", text="X")
                     box.row(align=True).prop(c.raw, "value1", text="Y")
                     box.row(align=True).prop(c.raw, "value2", text="Z")
+                elif c_kind == props.ConstraintsKind.PARALLEL:
+                    box.row(align=True).prop(c.raw, "point0", text="Point0")
+                    box.row(align=True).prop(c.raw, "point1", text="Point1")
+                    box.row(align=True).prop(c.raw, "point2", text="Point2")
+                    box.row(align=True).prop(c.raw, "point3", text="Point3")
+                elif c_kind == props.ConstraintsKind.PERPENDICULAR:
+                    box.row(align=True).prop(c.raw, "point0", text="Point0")
+                    box.row(align=True).prop(c.raw, "point1", text="Point1")
+                    box.row(align=True).prop(c.raw, "point2", text="Point2")
+                    box.row(align=True).prop(c.raw, "point3", text="Point3")
                 else:
                     raise Exception(f"Not supported: {c_display}")
                 row = box.row(align=True)
