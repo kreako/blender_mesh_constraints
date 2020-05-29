@@ -3,3 +3,4 @@ addons
 .pytest_cache
 archive
 .*.swp
+mesh_constraints.log
