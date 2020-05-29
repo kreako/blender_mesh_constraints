@@ -160,6 +160,9 @@ class Constraint:
         else:
             raise Exception(f"Unknown kind of constraints {self.kind}")
 
+    def __repr__(self):
+        return f"Constraint({self.kind}, {self.data})"
+
     def __getattr__(self, attr):
         return self.data[attr]
 
