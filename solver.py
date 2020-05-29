@@ -14,6 +14,8 @@ from sympy import symbols, sqrt, diff
 from sympy.matrices import Matrix
 import mpmath
 
+from . import log
+
 EPSILON = 1e-6
 CONVERGENCE_TOLERANCE = 1e-8
 VERY_POSITIVE = 1e10
@@ -278,6 +280,7 @@ class NewtonSolver:
         self.prepare_matrix()
         # Eval b now : values of equations with current values
         self._eval_b()
+        log.logger().debug(f"{self.b}")
         count = 0
         while True:
             # Eval jacobian with current values
@@ -316,6 +319,8 @@ class NewtonSolver:
                 if abs(b) > CONVERGENCE_TOLERANCE:
                     converged = False
                     break
+
+            log.logger().debug(f"{count} {self.b} {self.a}")
 
             if converged:
                 return {"solved": True}
@@ -358,10 +363,13 @@ class NewtonSolver:
 
     def solve(self):
         # Substitutes all I can first
+        log.logger().debug("start")
         while True:
             i = self.solve_by_substitution()
+            log.logger().debug(f"{i} {self.substitutes}")
             if i == 0:
                 break
+        log.logger().debug(f"{self.equations}")
         # Non substituted parts
         if len(self.equations) > 0:
             ret = self._solve()
@@ -394,9 +402,9 @@ class MeshPoint:
         self.x_value = co.x
         self.y_value = co.y
         self.z_value = co.z
-        self.x_param = symbols(f"{self.index}.x")
-        self.y_param = symbols(f"{self.index}.y")
-        self.z_param = symbols(f"{self.index}.z")
+        self.x_param = symbols(f"x{self.index}")
+        self.y_param = symbols(f"y{self.index}")
+        self.z_param = symbols(f"z{self.index}")
 
     @property
     def xyz(self):
@@ -428,6 +436,7 @@ class Solver:
     """Solver functionnality"""
 
     def __init__(self, points):
+        log.logger().debug(f"start: {points}")
         # List of mesh points
         self.points = points
 
@@ -444,6 +453,7 @@ class Solver:
         self.equations = []
         # equations index -> constraint
         self.equations_constraints = {}
+        log.logger().debug("end")
 
     def _add_equation(self, constraint, equation):
         self.equations.append(equation)
@@ -452,6 +462,7 @@ class Solver:
 
     def distance_2_vertices(self, constraint, point0, point1, distance):
         """Add a distance constraint between 2 vertices"""
+        log.logger().debug(f"{point0} {point1} {distance}")
         p0 = self.points[point0]
         p1 = self.points[point1]
         x0, y0, z0 = p0.x_param, p0.y_param, p0.z_param
@@ -463,21 +474,25 @@ class Solver:
 
     def fix_x(self, constraint, point, x_value):
         """Add a fix x coordinate constraint"""
+        log.logger().debug(f"{point} {x_value}")
         p = self.points[point]
         self._add_equation(constraint, p.x_param - x_value)
 
     def fix_y(self, constraint, point, y_value):
         """Add a fix y coordinate constraint"""
+        log.logger().debug(f"{point} {y_value}")
         p = self.points[point]
         self._add_equation(constraint, p.y_param - y_value)
 
     def fix_z(self, constraint, point, z_value):
         """Add a fix z coordinate constraint"""
+        log.logger().debug(f"{point} {z_value}")
         p = self.points[point]
         self._add_equation(constraint, p.z_param - z_value)
 
     def parallel(self, constraint, point0, point1, point2, point3):
         """Add a parallel constraint between p0-p1 and p2-p3"""
+        log.logger().debug(f"{point0} {point1} {point2} {point3}")
         p0 = self.points[point0]
         p1 = self.points[point1]
         p2 = self.points[point2]
@@ -500,6 +515,7 @@ class Solver:
 
     def perpendicular(self, constraint, point0, point1, point2, point3):
         """Add a perpendicular constraint between p0-p1 and p2-p3"""
+        log.logger().debug(f"{point0} {point1} {point2} {point3}")
         p0 = self.points[point0]
         p1 = self.points[point1]
         p2 = self.points[point2]
@@ -520,6 +536,7 @@ class Solver:
 
     def on_x(self, constraint, point0, point1):
         """Add a on X constraint for vector p0-p1"""
+        log.logger().debug(f"{point0} {point1}")
         p0 = self.points[point0]
         p1 = self.points[point1]
         self._add_equation(constraint, p0.y_param - p1.y_param)
@@ -527,6 +544,7 @@ class Solver:
 
     def on_y(self, constraint, point0, point1):
         """Add a on Y constraint for vector p0-p1"""
+        log.logger().debug(f"{point0} {point1}")
         p0 = self.points[point0]
         p1 = self.points[point1]
         self._add_equation(constraint, p0.x_param - p1.x_param)
@@ -534,6 +552,7 @@ class Solver:
 
     def on_z(self, constraint, point0, point1):
         """Add a on Z constraint for vector p0-p1"""
+        log.logger().debug(f"{point0} {point1}")
         p0 = self.points[point0]
         p1 = self.points[point1]
         self._add_equation(constraint, p0.x_param - p1.x_param)
@@ -545,6 +564,7 @@ class Solver:
         - "points", if "solved" is True, list of MeshPoint with up to date values
         - "reason", if "solved" is False, try to explain why it failed
         - "equations_in_error", if "solved" is False, list of equations in error"""
+        log.logger().debug(f"start: {self.equations} {self.initial_values}")
         newton_solver = NewtonSolver(self.equations, self.initial_values)
         ret = newton_solver.solve()
         if ret["solved"]:
@@ -558,12 +578,14 @@ class Solver:
             # TODO if rank_ok is False maybe I want
             # self.find_which_to_remove_to_fix_jacobian() ?
             del ret["values"]
+            log.logger().debug(f"OK ret: {ret}")
             return ret
         else:
             # solve failed :(
             ret["equations_in_error"] = [
                 self.equations_constraints[i] for i in ret["equations_in_error"]
             ]
+            log.logger().debug(f"NOK ret: {ret}")
             return ret
 
     def find_which_to_remove_to_fix_jacobian():
