@@ -23,7 +23,9 @@ def draw_text(font_id, x, y, label, color):
 
 
 class BatchDrawing:
-    def __init__(self, verts):
+    def __init__(self, verts, obj):
+        # object on which I draw
+        self.obj = obj
         # points index -> co
         self.points = {v.index:v.co for v in verts}
         # edge (point0, point1) -> [(label, color), ...]
@@ -48,6 +50,12 @@ class BatchDrawing:
         - color : color of the label"""
         self.vertices_label[point].append((label, color))
 
+    def _world_point(self, point_3d):
+        """Transform a 3D point from the mesh to a 3D point of the world
+        by multiplying with the matrix world
+        point_3d: 3D point of the object's mesh"""
+        return self.obj.matrix_world @ point_3d
+
     def draw(self, context):
         region = context.region
         rv3d = context.space_data.region_3d
@@ -58,7 +66,7 @@ class BatchDrawing:
 
         # First edges
         for (p0, p1), datas in self.edges_label.items():
-            p0_3d, p1_3d = self.points[p0], self.points[p1]
+            p0_3d, p1_3d = self._world_point(self.points[p0]), self._world_point(self.points[p1])
             # This edge in 2d
             p0_2d = location_3d_to_region_2d(region, rv3d, p0_3d)
             p1_2d = location_3d_to_region_2d(region, rv3d, p1_3d)
@@ -110,8 +118,8 @@ class BatchDrawing:
         # And now vertices
         for p, datas in self.vertices_label.items():
             point_3d = self.points[p]
-            world_point_3d = _world_point(o, point_3d)
-            world_point_2d = location_3d_to_region_2d(region, rv3d, point_3d)
+            world_point_3d = self._world_point(point_3d)
+            world_point_2d = location_3d_to_region_2d(region, rv3d, world_point_3d)
 
             if world_point_2d is None:
                 # Not in view
@@ -155,7 +163,7 @@ def draw_constraints_definition(context):
 
     bm = bmesh.from_edit_mesh(o.data)
     mc = props.MeshConstraints(o.MeshConstraintGenerator)
-    batch = BatchDrawing(bm.verts)
+    batch = BatchDrawing(bm.verts, o)
 
     for c in mc:
         if not c.view:
@@ -212,12 +220,11 @@ def draw_constraints_definition(context):
             point2 = bm.verts[c.point2].co
             point3 = bm.verts[c.point3].co
             # perpendicular if dot == 0
-            v0_3d = p1_3d - p0_3d
-            v1_3d = p3_3d - p2_3d
+            v0_3d, v1_3d = point1 - point0, point3 - point2
             d = v0_3d.dot(v1_3d)
             color = _select_color(c, equals(d, 0))
-            batch.add_edge_label((c.point0, c.point1), "|_", color)
-            batch.add_edge_label((c.point2, c.point3), "|_", color)
+            batch.add_edge_label((c.point0, c.point1), "L", color)
+            batch.add_edge_label((c.point2, c.point3), "L", color)
         elif c_kind == props.ConstraintsKind.ON_X:
             point0 = bm.verts[c.point0].co
             point1 = bm.verts[c.point1].co
@@ -259,15 +266,6 @@ def _select_color(constraint, constraint_ok):
         return COLOR_OK
     # Constraint is not OK
     return COLOR_CONSTRAINT_NOK
-
-
-def _world_point(o, point_3d):
-    """Transform a 3D point from the mesh to a 3D point of the world
-    by multiplying with the matrix world
-    o: object edited
-    point_3d: 3D point of the object's mesh"""
-    v = o.matrix_world @ point_3d.to_4d()
-    return v.to_3d()
 
 
 def _normal_vector(o, p0_3d, p1_3d):
