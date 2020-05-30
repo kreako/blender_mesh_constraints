@@ -85,26 +85,31 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXCoord(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_fix_x_coord"
     bl_label = "Add a fix X coordinate constraint"
     bl_description = (
-        "Add a constraint to fix X coordinate (select 1 vertex) (EDITMODE only)"
+        "Add a constraint to fix X coordinate (select 1 vertex or more) (EDITMODE only)"
     )
 
     def constraint_execute(self, context):
         vertices_list = self.selected_verts()
-
-        if len(vertices_list) != 1:
-            # TODO: add multiple constraints at once
-            return self.warning(
-                "I need you to select 1 vertex or I'm not able to fix a coordinate of a vertex"
-            )
-
-        point = vertices_list[0]
+        if not vertices_list:
+            return self.warning("You must select at least 1 vertex")
 
         k = props.ConstraintsKind.FIX_X_COORD
-        if self.mc.exist_constraint(k, point=point) is not None:
-            return self.warning("This constraint already exists...")
+        added = 0
+        existing = 0
+        for point in vertices_list:
+            if self.mc.exist_constraint(k, point=point) is not None:
+                existing += 1
+                continue
+            self.mc.add_fix_x_coord(point, self.bm.verts[point].co.x)
+            added += 1
 
-        self.mc.add_fix_x_coord(point, self.bm.verts[point].co.x)
+        if existing > 0 and added == 0:
+            return self.warning(f"{existing} constraints already exist, so I did nothing...")
 
+        if existing > 0 and added > 0:
+            self.info(f"Added {added} constraints, {existing} already existing.")
+        else:
+            self.info(f"Added {added} constraints")
         return {"FINISHED"}
 
 
