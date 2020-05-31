@@ -482,8 +482,8 @@ class Solver:
         log.logger().debug(f"{point0} {point1} {point2} {point3}")
         p0 = self.points[point0]
         p1 = self.points[point1]
-        p2 = self.points[point0]
-        p3 = self.points[point1]
+        p2 = self.points[point2]
+        p3 = self.points[point3]
         x0, y0, z0 = p0.x_param, p0.y_param, p0.z_param
         x1, y1, z1 = p1.x_param, p1.y_param, p1.z_param
         x2, y2, z2 = p2.x_param, p2.y_param, p2.z_param
