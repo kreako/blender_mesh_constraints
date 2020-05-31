@@ -359,31 +359,27 @@ class MESH_CONSTRAINTS_OT_ConstraintOnX(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_on_x"
     bl_label = "Add an On X constraint"
     bl_description = (
-        "Add a constraint to make an edge parallel to X axis (select 2 vertices or 1 edge) (EDITMODE only)"
+        "Add a constraint to make an edge parallel to X axis (select edges) (EDITMODE only)"
     )
 
     def constraint_execute(self, context):
-        # TODO: add multiple constraints at once
-        if "EDGE" in self.bm.select_mode:
-            edges_list = self.selected_edges()
-            if len(edges_list) != 1:
-                return self.warning(
-                    "I need you to select 1 edge or I'm not able to add an On X constraint for an edge"
-                )
-            p0, p1 = [v.index for v in self.bm.edges[edges_list[0]].verts]
-        else:
-            vertices_list = self.selected_verts()
-            if len(vertices_list) != 2:
-                return self.warning(
-                    "I need you to select 2 vertices or I'm not able to add an On X constraint for an edge"
-                )
-            p0, p1 = vertices_list
-
+        edges = self.selected_edges()
+        if not edges:
+            return self.warning(
+                "I need you to select at least on edge or I'm not able to add an On X constraint for edges"
+            )
         k = props.ConstraintsKind.ON_X
-        if self.mc.exist_constraint(k, point0=p0, point1=p1) is not None:
-            return self.warning("This constraint already exists...")
-        self.mc.add_on_x(p0, p1)
-        return {"FINISHED"}
+        added = 0
+        existing = 0
+        for edge in edges:
+            p0, p1 = [v.index for v in self.bm.edges[edge].verts]
+            if self.mc.exist_constraint(k, point0=p0, point1=p1) is not None:
+                existing += 1
+                continue
+            self.mc.add_on_x(p0, p1)
+            added += 1
+
+        return return_helper(self, existing, added)
 
 
 class MESH_CONSTRAINTS_OT_ConstraintOnY(ConstraintOperator):
@@ -446,3 +442,14 @@ class MESH_CONSTRAINTS_OT_ConstraintOnZ(ConstraintOperator):
             return self.warning("This constraint already exists...")
         self.mc.add_on_z(p0, p1)
         return {"FINISHED"}
+
+
+def return_helper(operator, existing, added):
+    if existing > 0 and added == 0:
+        return operator.warning(f"{existing} constraints already exist, so I did nothing...")
+
+    if existing > 0 and added > 0:
+        operator.info(f"Added {added} constraints, {existing} already existing.")
+    else:
+        operator.info(f"Added {added} constraints")
+    return {"FINISHED"}
