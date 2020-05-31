@@ -408,6 +408,35 @@ class MESH_CONSTRAINTS_OT_ConstraintOnZ(ConstraintOperator):
         return return_helper(self, existing, added)
 
 
+class MESH_CONSTRAINTS_OT_ConstraintSameDistance2Edges(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_same_distance_2_edges"
+    bl_label = "Same distance constraint between 2 edges"
+    bl_description = (
+        "Add a same distance constraint between 2 edges (select 2 edges) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        edges_list = self.selected_edges()
+
+        if len(edges_list) != 2:
+            # TODO: add multiple constraints at once
+            return self.warning(
+                "I need you to select 2 edges or I'm not able to add a same distance constraint between 2 edges"
+            )
+
+        edge0, edge1 = edges_list
+        p0, p1 = [v.index for v in self.bm.edges[edge0].verts]
+        p2, p3 = [v.index for v in self.bm.edges[edge1].verts]
+
+        k = props.ConstraintsKind.SAME_DISTANCE
+        if self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3) is not None:
+            return self.warning("This constraint already exists...")
+
+        self.mc.add_same_distance(p0, p1, p2, p3)
+
+        return {"FINISHED"}
+
+
 def return_helper(operator, existing, added):
     if existing > 0 and added == 0:
         return operator.warning(f"{existing} constraints already exist, so I did nothing...")
