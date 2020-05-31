@@ -1,3 +1,4 @@
+import math
 import bmesh
 
 from . import base
@@ -51,6 +52,23 @@ class ConstraintOperator(base.MeshConstraintsOperator):
         co0 = self.bm.verts[point0].co
         co1 = self.bm.verts[point1].co
         return (co1 - co0).length
+
+    def angle(self, p0, p1, p2, p3):
+        """Compute the angle between 2 edges p0-p1 and p2-p3
+        Returns angle in degrees"""
+        p0 = self.bm.verts[point0].co
+        p1 = self.bm.verts[point1].co
+        p2 = self.bm.verts[point2].co
+        p3 = self.bm.verts[point3].co
+
+        # v0 : vector p0-p1
+        v0 = p1 - p0
+        # v1 : vector p2-p3
+        v1 = p3 - p2
+
+        # dot product of v0 and v1 / (v0.length * v1.length) = cos(angle in radian)
+        cos_rad = v0.dot(v1) / (v0.length * v1.length)
+        return math.acos(cos_rad) * 180 / math.pi
 
 
 class MESH_CONSTRAINTS_OT_ConstraintDistance2Vertices(ConstraintOperator):
@@ -245,9 +263,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixYZCoord(ConstraintOperator):
 class MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_fix_xyz_coord"
     bl_label = "Add fix X, Y and Z coordinates constraints"
-    bl_description = (
-        "Add constraints to fix X, Y and Z coordinates (select 1 vertex) (EDITMODE only)"
-    )
+    bl_description = "Add constraints to fix X, Y and Z coordinates (select 1 vertex) (EDITMODE only)"
 
     def constraint_execute(self, context):
         vertices_list = self.selected_verts()
@@ -289,7 +305,10 @@ class MESH_CONSTRAINTS_OT_ConstraintParallel2Edges(ConstraintOperator):
         p2, p3 = [v.index for v in self.bm.edges[edge1].verts]
 
         k = props.ConstraintsKind.PARALLEL
-        if self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3) is not None:
+        if (
+            self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3)
+            is not None
+        ):
             return self.warning("This constraint already exists...")
 
         self.mc.add_parallel(p0, p1, p2, p3)
@@ -300,9 +319,7 @@ class MESH_CONSTRAINTS_OT_ConstraintParallel2Edges(ConstraintOperator):
 class MESH_CONSTRAINTS_OT_ConstraintPerpendicular2Edges(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_perpendicular_2_edges"
     bl_label = "Perpendicular constraint between 2 edges"
-    bl_description = (
-        "Add a perpendicular constraint between 2 edges (select 4 vertices or 2 edges) (EDITMODE only)"
-    )
+    bl_description = "Add a perpendicular constraint between 2 edges (select 4 vertices or 2 edges) (EDITMODE only)"
 
     def constraint_execute(self, context):
         # TODO if vertex selection ?
@@ -319,7 +336,10 @@ class MESH_CONSTRAINTS_OT_ConstraintPerpendicular2Edges(ConstraintOperator):
         p2, p3 = [v.index for v in self.bm.edges[edge1].verts]
 
         k = props.ConstraintsKind.PERPENDICULAR
-        if self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3) is not None:
+        if (
+            self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3)
+            is not None
+        ):
             return self.warning("This constraint already exists...")
 
         self.mc.add_perpendicular(p0, p1, p2, p3)
@@ -330,9 +350,7 @@ class MESH_CONSTRAINTS_OT_ConstraintPerpendicular2Edges(ConstraintOperator):
 class MESH_CONSTRAINTS_OT_ConstraintOnX(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_on_x"
     bl_label = "Add an On X constraint"
-    bl_description = (
-        "Add a constraint to make an edge parallel to X axis (select edges) (EDITMODE only)"
-    )
+    bl_description = "Add a constraint to make an edge parallel to X axis (select edges) (EDITMODE only)"
 
     def constraint_execute(self, context):
         edges = self.selected_edges()
@@ -357,9 +375,7 @@ class MESH_CONSTRAINTS_OT_ConstraintOnX(ConstraintOperator):
 class MESH_CONSTRAINTS_OT_ConstraintOnY(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_on_y"
     bl_label = "Add an On Y constraint"
-    bl_description = (
-        "Add a constraint to make an edge parallel to Y axis (select edges) (EDITMODE only)"
-    )
+    bl_description = "Add a constraint to make an edge parallel to Y axis (select edges) (EDITMODE only)"
 
     def constraint_execute(self, context):
         edges = self.selected_edges()
@@ -384,9 +400,7 @@ class MESH_CONSTRAINTS_OT_ConstraintOnY(ConstraintOperator):
 class MESH_CONSTRAINTS_OT_ConstraintOnZ(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_on_z"
     bl_label = "Add an On Z constraint"
-    bl_description = (
-        "Add a constraint to make an edge parallel to Z axis (select edges) (EDITMODE only)"
-    )
+    bl_description = "Add a constraint to make an edge parallel to Z axis (select edges) (EDITMODE only)"
 
     def constraint_execute(self, context):
         edges = self.selected_edges()
@@ -411,9 +425,7 @@ class MESH_CONSTRAINTS_OT_ConstraintOnZ(ConstraintOperator):
 class MESH_CONSTRAINTS_OT_ConstraintSameDistance2Edges(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_same_distance_2_edges"
     bl_label = "Same distance constraint between 2 edges"
-    bl_description = (
-        "Add a same distance constraint between 2 edges (select 2 edges) (EDITMODE only)"
-    )
+    bl_description = "Add a same distance constraint between 2 edges (select 2 edges) (EDITMODE only)"
 
     def constraint_execute(self, context):
         edges_list = self.selected_edges()
@@ -429,7 +441,10 @@ class MESH_CONSTRAINTS_OT_ConstraintSameDistance2Edges(ConstraintOperator):
         p2, p3 = [v.index for v in self.bm.edges[edge1].verts]
 
         k = props.ConstraintsKind.SAME_DISTANCE
-        if self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3) is not None:
+        if (
+            self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3)
+            is not None
+        ):
             return self.warning("This constraint already exists...")
 
         self.mc.add_same_distance(p0, p1, p2, p3)
@@ -437,9 +452,44 @@ class MESH_CONSTRAINTS_OT_ConstraintSameDistance2Edges(ConstraintOperator):
         return {"FINISHED"}
 
 
+class MESH_CONSTRAINTS_OT_ConstraintAngle(ConstraintOperator):
+    bl_idname = "mesh_constraints.constraint_angle"
+    bl_label = "Angle constraint between 2 edges"
+    bl_description = (
+        "Add an angle constraint between 2 edges (select 2 edges) (EDITMODE only)"
+    )
+
+    def constraint_execute(self, context):
+        edges_list = self.selected_edges()
+
+        if len(edges_list) != 2:
+            # TODO: add multiple constraints at once
+            return self.warning(
+                "I need you to select 2 edges or I'm not able to add an angle constraint between 2 edges"
+            )
+
+        edge0, edge1 = edges_list
+        p0, p1 = [v.index for v in self.bm.edges[edge0].verts]
+        p2, p3 = [v.index for v in self.bm.edges[edge1].verts]
+
+        k = props.ConstraintsKind.ANGLE
+        if (
+            self.mc.exist_constraint(k, point0=p0, point1=p1, point2=p2, point3=p3)
+            is not None
+        ):
+            return self.warning("This constraint already exists...")
+
+        angle = self.angle(p0, p1, p2, p3)
+        self.mc.add_angle(p0, p1, p2, p3, angle)
+
+        return {"FINISHED"}
+
+
 def return_helper(operator, existing, added):
     if existing > 0 and added == 0:
-        return operator.warning(f"{existing} constraints already exist, so I did nothing...")
+        return operator.warning(
+            f"{existing} constraints already exist, so I did nothing..."
+        )
 
     if existing > 0 and added > 0:
         operator.info(f"Added {added} constraints, {existing} already existing.")

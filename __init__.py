@@ -80,6 +80,7 @@ def register():
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintOnY)
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintOnZ)
     register_class(operators.MESH_CONSTRAINTS_OT_ConstraintSameDistance2Edges)
+    register_class(operators.MESH_CONSTRAINTS_OT_ConstraintAngle)
 
     # Panels
     register_class(panels.MeshConstraintsPanelMain)
@@ -114,6 +115,7 @@ def unregister():
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintOnY)
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintOnZ)
     unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintSameDistance2Edges)
+    unregister_class(operators.MESH_CONSTRAINTS_OT_ConstraintAngle)
 
     # Properties
     unregister_class(props.MeshConstraintsContainer)
