@@ -698,3 +698,21 @@ def test_solver_avoid_loop_in_substitutes():
     assert equal_float(cross.x, 0)
     assert equal_float(cross.y, 0)
     assert equal_float(cross.z, 0)
+
+
+def test_solver_same_distance():
+    s = Solver([MeshPoint(0, Vector3(10, 10, 10)), MeshPoint(1, Vector3(20, 20, 20)),
+MeshPoint(2, Vector3(11, 11, 11)), MeshPoint(3, Vector3(21, 22, 23)),
+                ])
+    s.same_distance(42, 0, 1, 2, 3)
+    ret = s.solve()
+    assert ret["solved"]
+    points = ret["points"]
+    assert len(points) == 4
+    p0 = points[0]
+    p1 = points[1]
+    p2 = points[2]
+    p3 = points[3]
+    d1 = math.sqrt((p0.x - p1.x) ** 2 + (p0.y - p1.y) ** 2 + (p0.z - p1.z) ** 2)
+    d2 = math.sqrt((p2.x - p3.x) ** 2 + (p2.y - p3.y) ** 2 + (p2.z - p3.z) ** 2)
+    assert equal_float(d1, d2)
