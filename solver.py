@@ -10,7 +10,7 @@ from mathutils import Vector
 
 
 sys.path.append("/home/noumir/.local/lib/python3.8/site-packages")
-from sympy import symbols, sqrt, diff
+from sympy import symbols, sqrt, diff, cos
 from sympy.matrices import Matrix
 import mpmath
 
@@ -579,6 +579,33 @@ class Solver:
         p1 = self.points[point1]
         self._add_equation(constraint, p0.x_param - p1.x_param)
         self._add_equation(constraint, p0.y_param - p1.y_param)
+
+    def angle(self, constraint, point0, point1, point2, point3, angle):
+        """Add an angle constraint between 2 vectors p0-p1 and p2-p3
+        - angle is expressed in degrees"""
+        log.logger().debug(f"{point0} {point1} {point2} {point3} {angle}")
+        p0 = self.points[point0]
+        p1 = self.points[point1]
+        p2 = self.points[point2]
+        p3 = self.points[point3]
+
+        # v0 : vector p0-p1
+        v0x = p1.x_param - p0.x_param
+        v0y = p1.y_param - p0.y_param
+        v0z = p1.z_param - p0.z_param
+
+        # v1 : vector p2-p3
+        v1x = p3.x_param - p2.x_param
+        v1y = p3.y_param - p2.y_param
+        v1z = p3.z_param - p2.z_param
+
+        # dot product of v0 and v1 / (v0.length * v1.length) = cos(angle in radian)
+        dot_product = v0x * v1x + v0y * v1y + v0z * v1z
+        v0_length = sqrt(v0x ** 2 + v0y ** 2 + v0z ** 2)
+        v1_length = sqrt(v1x ** 2 + v1y ** 2 + v1z ** 2)
+        rad = angle * math.pi / 180
+        self._add_equation(constraint, dot_product / (v0_length * v1_length) - cos(rad))
+
 
     def solve(self):
         """Solve and return an object representing the solve operation with

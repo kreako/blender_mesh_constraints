@@ -738,3 +738,40 @@ def test_solver_same_distance():
     d1 = math.sqrt((p0.x - p1.x) ** 2 + (p0.y - p1.y) ** 2 + (p0.z - p1.z) ** 2)
     d2 = math.sqrt((p2.x - p3.x) ** 2 + (p2.y - p3.y) ** 2 + (p2.z - p3.z) ** 2)
     assert equal_float(d1, d2)
+
+
+def test_solver_angle_2d():
+    s = Solver(
+        [
+            MeshPoint(0, Vector3(0, 0, 0)),
+            MeshPoint(1, Vector3(1, 0, 0)),
+            MeshPoint(2, Vector3(0, 1, 0)),
+        ]
+    )
+    s.angle(42, 0, 1, 0, 2, 45)
+    s.fix_x(43, 0, 0)
+    s.fix_y(43, 0, 0)
+    s.fix_z(43, 0, 0)
+    s.fix_x(44, 1, 1)
+    s.fix_y(44, 1, 0)
+    s.fix_z(44, 1, 0)
+    s.fix_z(45, 2, 0)
+    s.distance_2_vertices(46, 0, 2, 1.4142135623730951)
+    ret = s.solve()
+    assert ret["solved"]
+    points = ret["points"]
+    assert len(points) == 3
+    p0 = points[0]
+    p1 = points[1]
+    p2 = points[2]
+    assert equal_float(p0.x, 0)
+    assert equal_float(p0.y, 0)
+    assert equal_float(p0.z, 0)
+
+    assert equal_float(p1.x, 1)
+    assert equal_float(p1.y, 0)
+    assert equal_float(p1.z, 0)
+
+    assert equal_float(p2.x, 1)
+    assert equal_float(p2.y, 1)
+    assert equal_float(p2.z, 0)
