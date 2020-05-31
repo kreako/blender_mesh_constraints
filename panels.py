@@ -212,4 +212,7 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
 
         box = self.layout.box()
         row = box.row(align=True)
+        row.operator("mesh_constraints.hide_all_constraints", text="Hide all", icon="HIDE_ON")
+        row.operator("mesh_constraints.show_all_constraints", text="Show all", icon="HIDE_OFF")
+        row = box.row(align=True)
         row.operator("mesh_constraints.delete_all_constraints", text="Delete all", icon="X")

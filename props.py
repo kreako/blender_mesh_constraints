@@ -219,6 +219,14 @@ class MeshConstraints:
         while len(self.mc.constraints) > 0:
             self.mc.constraints.remove(0)
 
+    def hide_all(self):
+        for c in self.mc.constraints:
+            c.view = False
+
+    def show_all(self):
+        for c in self.mc.constraints:
+            c.view = True
+
     def clear_in_errors(self):
         """Clear all in_error flags on constraints"""
         for c in self.mc.constraints:

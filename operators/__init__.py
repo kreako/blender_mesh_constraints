@@ -35,6 +35,8 @@ from .constraints import (
 from .misc import (
     MESH_CONSTRAINTS_OT_DeleteConstraint,
     MESH_CONSTRAINTS_OT_DeleteAllConstraints,
+    MESH_CONSTRAINTS_OT_HideAllConstraints,
+    MESH_CONSTRAINTS_OT_ShowAllConstraints,
 )
 
 
@@ -45,6 +47,7 @@ def reload():
     importlib.reload(draw)
     importlib.reload(solve)
     importlib.reload(constraints)
+    importlib.reload(misc)
 
 
 __all__ = [
