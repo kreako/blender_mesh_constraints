@@ -477,6 +477,23 @@ class Solver:
             sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2 + (z0 - z1) ** 2) - distance,
         )
 
+    def same_distance(self, constraint, point0, point1, point2, point3):
+        """Add a same distance constraint between 2 edges p0-p1 and p2-p3"""
+        log.logger().debug(f"{point0} {point1} {distance}")
+        p0 = self.points[point0]
+        p1 = self.points[point1]
+        p2 = self.points[point0]
+        p3 = self.points[point1]
+        x0, y0, z0 = p0.x_param, p0.y_param, p0.z_param
+        x1, y1, z1 = p1.x_param, p1.y_param, p1.z_param
+        x2, y2, z2 = p2.x_param, p2.y_param, p2.z_param
+        x3, y3, z3 = p3.x_param, p3.y_param, p3.z_param
+        self._add_equation(
+            constraint,
+            sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2 + (z0 - z1) ** 2)
+            - sqrt((x2 - x3) ** 2 + (y2 - y3) ** 2 + (z2 - z3) ** 2),
+        )
+
     def fix_x(self, constraint, point, x_value):
         """Add a fix x coordinate constraint"""
         log.logger().debug(f"{point} {x_value}")
