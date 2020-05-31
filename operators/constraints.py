@@ -178,6 +178,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixZCoord(ConstraintOperator):
 
 
 class MESH_CONSTRAINTS_OT_ConstraintFixXYCoord(ConstraintOperator):
+    # TODO remove ?
     bl_idname = "mesh_constraints.constraint_fix_xy_coord"
     bl_label = "Add fix X and Y coordinates constraints"
     bl_description = (
@@ -207,6 +208,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXYCoord(ConstraintOperator):
 
 
 class MESH_CONSTRAINTS_OT_ConstraintFixXZCoord(ConstraintOperator):
+    # TODO remove ?
     bl_idname = "mesh_constraints.constraint_fix_xz_coord"
     bl_label = "Add fix X and Z coordinates constraints"
     bl_description = (
@@ -234,6 +236,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXZCoord(ConstraintOperator):
 
 
 class MESH_CONSTRAINTS_OT_ConstraintFixYZCoord(ConstraintOperator):
+    # TODO remove ?
     bl_idname = "mesh_constraints.constraint_fix_yz_coord"
     bl_label = "Add fix Y and Z coordinates constraints"
     bl_description = (
