@@ -342,3 +342,15 @@ def test_reverse_iter(mesh_constraints_data):
             assert c.y == 0
         else:
             assert False
+
+
+def test_delete_all(mesh_constraints_data):
+    mc = MeshConstraints(mesh_constraints_data)
+    assert len(mc) == 0
+    mc.add_fix_z_coord(0, 4)
+    mc.add_distance_between_2_vertices(2, 0, 5)
+    mc.add_fix_x_coord(1, 1.3)
+    mc.add_fix_y_coord(1, 0)
+    assert len(mc) == 4
+    mc.delete_all()
+    assert len(mc) == 0

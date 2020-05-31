@@ -28,3 +28,25 @@ class MESH_CONSTRAINTS_OT_DeleteConstraint(base.MeshConstraintsOperator):
 
         context.area.tag_redraw()
         return {"FINISHED"}
+
+
+class MESH_CONSTRAINTS_OT_DeleteAllConstraints(base.MeshConstraintsOperator):
+    bl_idname = "mesh_constraints.delete_all_constraints"
+    bl_label = "Delete all"
+    bl_description = "Delete all constraints"
+
+    def execute(self, context):
+        if context.area.type != "VIEW_3D":
+            return self.warning("I'm not able to find VIEW_3D, so I won't run")
+        o = context.object
+        if o is None:
+            return self.warning(f"No object found")
+        if "MeshConstraintGenerator" not in o:
+            return self.warning(f"No constraints found on this object {o.name}")
+
+        mc = props.MeshConstraints(o.MeshConstraintGenerator)
+
+        mc.delete_all()
+
+        context.area.tag_redraw()
+        return {"FINISHED"}

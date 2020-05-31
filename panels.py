@@ -122,7 +122,8 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
         mc = props.MeshConstraints(o.MeshConstraintGenerator)
 
         box = self.layout.box()
-        if len(mc) == 0:
+        len_mc = len(mc)
+        if len_mc == 0:
             box.row(align=True).label(text="No constraints yet")
         for index, c in enumerate(mc.reverse()):
             # TODO do something with ValueError ?
@@ -140,7 +141,7 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                 row.prop(c.raw, "value0", text="")
             delete_op = "mesh_constraints.delete_constraint"
 
-            row.operator(delete_op, text="", icon="X").index = index
+            row.operator(delete_op, text="", icon="X").index = len_mc - index - 1
             if c.show_details:
                 row = box.row(align=True)
                 row.label(text=c_display)
@@ -208,3 +209,7 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                     raise Exception(f"Not supported: {c_display}")
                 row = box.row(align=True)
                 row.label(text="")
+
+        box = self.layout.box()
+        row = box.row(align=True)
+        row.operator("mesh_constraints.delete_all_constraints", text="Delete all", icon="X")

@@ -215,6 +215,10 @@ class MeshConstraints:
     def remove(self, index):
         self.mc.constraints.remove(index)
 
+    def delete_all(self):
+        while len(self.mc.constraints) > 0:
+            self.mc.constraints.remove(0)
+
     def clear_in_errors(self):
         """Clear all in_error flags on constraints"""
         for c in self.mc.constraints:

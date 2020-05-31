@@ -32,7 +32,10 @@ from .constraints import (
     MESH_CONSTRAINTS_OT_ConstraintSameDistance2Edges,
     MESH_CONSTRAINTS_OT_ConstraintAngle,
 )
-from .misc import MESH_CONSTRAINTS_OT_DeleteConstraint
+from .misc import (
+    MESH_CONSTRAINTS_OT_DeleteConstraint,
+    MESH_CONSTRAINTS_OT_DeleteAllConstraints,
+)
 
 
 def reload():
