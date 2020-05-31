@@ -197,6 +197,17 @@ class MeshConstraints:
         for c in self.mc.constraints:
             yield Constraint(c)
 
+    def reverse(self):
+        class ReverseIter:
+            def __init__(self, constraints):
+                self.constraints = constraints
+
+            def __iter__(self):
+                for c in self.constraints[::-1]:
+                    yield Constraint(c)
+
+        return ReverseIter(self.mc.constraints)
+
     def __getitem__(self, key):
         return Constraint(self.mc.constraints[key])
 
@@ -436,7 +447,6 @@ class MeshConstraints:
         c.point1 = point1
         c.point2 = point2
         c.point3 = point3
-
 
     def add_angle(self, point0, point1, point2, point3, angle):
         """Add a ConstraintsKind::ANGLE with parameters

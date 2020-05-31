@@ -312,3 +312,33 @@ def test_angle(mesh_constraints_data):
     assert c.point2 == 5
     assert c.point3 == 6
     assert c.angle == 42.3
+
+
+def test_reverse_iter(mesh_constraints_data):
+    mc = MeshConstraints(mesh_constraints_data)
+    assert len(mc) == 0
+    mc.add_fix_z_coord(0, 4)
+    mc.add_distance_between_2_vertices(2, 0, 5)
+    mc.add_fix_x_coord(1, 1.3)
+    mc.add_fix_y_coord(1, 0)
+    assert len(mc) == 4
+    for i, c in enumerate(mc.reverse()):
+        if i == 3:
+            assert ConstraintsKind(c.kind) == ConstraintsKind.FIX_Z_COORD
+            assert c.point == 0
+            assert c.z == 4
+        elif i == 2:
+            assert ConstraintsKind(c.kind) == ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES
+            assert c.point0 == 2
+            assert c.point1 == 0
+            assert c.distance == 5
+        elif i == 1:
+            assert ConstraintsKind(c.kind) == ConstraintsKind.FIX_X_COORD
+            assert c.point == 1
+            assert c.x == 1.3
+        elif i == 0:
+            assert ConstraintsKind(c.kind) == ConstraintsKind.FIX_Y_COORD
+            assert c.point == 1
+            assert c.y == 0
+        else:
+            assert False
