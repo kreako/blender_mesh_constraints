@@ -56,10 +56,10 @@ class ConstraintOperator(base.MeshConstraintsOperator):
     def angle(self, p0, p1, p2, p3):
         """Compute the angle between 2 edges p0-p1 and p2-p3
         Returns angle in degrees"""
-        p0 = self.bm.verts[point0].co
-        p1 = self.bm.verts[point1].co
-        p2 = self.bm.verts[point2].co
-        p3 = self.bm.verts[point3].co
+        p0 = self.bm.verts[p0].co
+        p1 = self.bm.verts[p1].co
+        p2 = self.bm.verts[p2].co
+        p3 = self.bm.verts[p3].co
 
         # v0 : vector p0-p1
         v0 = p1 - p0
