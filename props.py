@@ -27,6 +27,7 @@ class ConstraintsKind(Enum):
     ON_Y = "12"
     ON_Z = "13"
     SAME_DISTANCE = "14"
+    ANGLE = "15"
 
 
 # For kind EnumProperty
@@ -57,6 +58,7 @@ constraints_kind_abbreviation = {
     ConstraintsKind.ON_Y: "On Y",
     ConstraintsKind.ON_Z: "On Z",
     ConstraintsKind.SAME_DISTANCE: "Dist. =",
+    ConstraintsKind.ANGLE: "Angle",
 }
 
 
@@ -165,6 +167,13 @@ class Constraint:
             self.data["point2"] = constraint_properties.point2
             self.data["point3"] = constraint_properties.point3
             self.nb_values = 0
+        elif self.kind == ConstraintsKind.ANGLE:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.data["point2"] = constraint_properties.point2
+            self.data["point3"] = constraint_properties.point3
+            self.data["angle"] = constraint_properties.value0
+            self.nb_values = 1
         else:
             raise Exception(f"Unknown kind of constraints {self.kind}")
 
@@ -245,6 +254,7 @@ class MeshConstraints:
                     ConstraintsKind.PARALLEL,
                     ConstraintsKind.PERPENDICULAR,
                     ConstraintsKind.SAME_DISTANCE,
+                    ConstraintsKind.ANGLE,
                 ):
                     point0 = kwargs["point0"]
                     point1 = kwargs["point1"]
@@ -427,3 +437,18 @@ class MeshConstraints:
         c.point2 = point2
         c.point3 = point3
 
+
+    def add_angle(self, point0, point1, point2, point3, angle):
+        """Add a ConstraintsKind::ANGLE with parameters
+        point0: vertex index of point0
+        point1: vertex index of point1
+        point2: vertex index of point2
+        point3: vertex index of point3
+        angle: angle in degree"""
+        c = self._add()
+        c.kind = ConstraintsKind.ANGLE.value
+        c.point0 = point0
+        c.point1 = point1
+        c.point2 = point2
+        c.point3 = point3
+        c.value0 = angle
