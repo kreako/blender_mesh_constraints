@@ -200,10 +200,11 @@ class MeshConstraints:
     def reverse(self):
         class ReverseIter:
             def __init__(self, constraints):
-                self.constraints = constraints
+                self.constraints = list(constraints)
+                self.constraints.reverse()
 
             def __iter__(self):
-                for c in self.constraints[::-1]:
+                for c in self.constraints:
                     yield Constraint(c)
 
         return ReverseIter(self.mc.constraints)
