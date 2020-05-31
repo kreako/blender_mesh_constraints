@@ -479,7 +479,7 @@ class Solver:
 
     def same_distance(self, constraint, point0, point1, point2, point3):
         """Add a same distance constraint between 2 edges p0-p1 and p2-p3"""
-        log.logger().debug(f"{point0} {point1} {distance}")
+        log.logger().debug(f"{point0} {point1} {point2} {point3}")
         p0 = self.points[point0]
         p1 = self.points[point1]
         p2 = self.points[point0]
