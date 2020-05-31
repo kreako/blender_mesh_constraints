@@ -51,14 +51,8 @@ class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
             ],
         )
         row.operator(
-            "mesh_constraints.constraint_parallel_2_edges",
-            text=props.constraints_kind_abbreviation[props.ConstraintsKind.PARALLEL],
-        )
-        row.operator(
-            "mesh_constraints.constraint_perpendicular_2_edges",
-            text=props.constraints_kind_abbreviation[
-                props.ConstraintsKind.PERPENDICULAR
-            ],
+            "mesh_constraints.constraint_same_distance_2_edges",
+            text=props.constraints_kind_abbreviation[props.ConstraintsKind.SAME_DISTANCE],
         )
         row = box.row()
         row.operator(
@@ -98,8 +92,18 @@ class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
         )
         row = box.row()
         row.operator(
-            "mesh_constraints.constraint_same_distance_2_edges",
-            text=props.constraints_kind_abbreviation[props.ConstraintsKind.SAME_DISTANCE],
+            "mesh_constraints.constraint_angle",
+            text=props.constraints_kind_abbreviation[props.ConstraintsKind.ANGLE],
+        )
+        row.operator(
+            "mesh_constraints.constraint_parallel_2_edges",
+            text=props.constraints_kind_abbreviation[props.ConstraintsKind.PARALLEL],
+        )
+        row.operator(
+            "mesh_constraints.constraint_perpendicular_2_edges",
+            text=props.constraints_kind_abbreviation[
+                props.ConstraintsKind.PERPENDICULAR
+            ],
         )
 
 
@@ -190,6 +194,12 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                     box.row(align=True).prop(c.raw, "point0", text="Point0")
                     box.row(align=True).prop(c.raw, "point1", text="Point1")
                 elif c_kind == props.ConstraintsKind.SAME_DISTANCE:
+                    box.row(align=True).prop(c.raw, "point0", text="Point0")
+                    box.row(align=True).prop(c.raw, "point1", text="Point1")
+                    box.row(align=True).prop(c.raw, "point2", text="Point2")
+                    box.row(align=True).prop(c.raw, "point3", text="Point3")
+                elif c_kind == props.ConstraintsKind.ANGLE:
+                    box.row(align=True).prop(c.raw, "value0", text="Angle")
                     box.row(align=True).prop(c.raw, "point0", text="Point0")
                     box.row(align=True).prop(c.raw, "point1", text="Point1")
                     box.row(align=True).prop(c.raw, "point2", text="Point2")
