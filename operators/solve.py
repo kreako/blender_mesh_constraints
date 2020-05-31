@@ -69,6 +69,8 @@ class MESH_CONSTRAINTS_OT_Solve(base.MeshConstraintsOperator):
                 s.on_y(index, c.point0, c.point1)
             elif c.kind == ConstraintsKind.ON_Z:
                 s.on_z(index, c.point0, c.point1)
+            elif c.kind == ConstraintsKind.SAME_DISTANCE:
+                s.same_distance(index, c.point0, c.point1, c.point2, c.point3)
             else:
                 raise Exception(f"Unknown kind of constraints {c.kind}")
 
