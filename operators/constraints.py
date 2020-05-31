@@ -103,14 +103,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXCoord(ConstraintOperator):
             self.mc.add_fix_x_coord(point, self.bm.verts[point].co.x)
             added += 1
 
-        if existing > 0 and added == 0:
-            return self.warning(f"{existing} constraints already exist, so I did nothing...")
-
-        if existing > 0 and added > 0:
-            self.info(f"Added {added} constraints, {existing} already existing.")
-        else:
-            self.info(f"Added {added} constraints")
-        return {"FINISHED"}
+        return return_helper(self, existing, added)
 
 
 class MESH_CONSTRAINTS_OT_ConstraintFixYCoord(ConstraintOperator):
@@ -135,14 +128,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixYCoord(ConstraintOperator):
             self.mc.add_fix_y_coord(point, self.bm.verts[point].co.y)
             added += 1
 
-        if existing > 0 and added == 0:
-            return self.warning(f"{existing} constraints already exist, so I did nothing...")
-
-        if existing > 0 and added > 0:
-            self.info(f"Added {added} constraints, {existing} already existing.")
-        else:
-            self.info(f"Added {added} constraints")
-        return {"FINISHED"}
+        return return_helper(self, existing, added)
 
 
 class MESH_CONSTRAINTS_OT_ConstraintFixZCoord(ConstraintOperator):
@@ -167,14 +153,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixZCoord(ConstraintOperator):
             self.mc.add_fix_z_coord(point, self.bm.verts[point].co.z)
             added += 1
 
-        if existing > 0 and added == 0:
-            return self.warning(f"{existing} constraints already exist, so I did nothing...")
-
-        if existing > 0 and added > 0:
-            self.info(f"Added {added} constraints, {existing} already existing.")
-        else:
-            self.info(f"Added {added} constraints")
-        return {"FINISHED"}
+        return return_helper(self, existing, added)
 
 
 class MESH_CONSTRAINTS_OT_ConstraintFixXYCoord(ConstraintOperator):
@@ -285,14 +264,7 @@ class MESH_CONSTRAINTS_OT_ConstraintFixXYZCoord(ConstraintOperator):
             self.mc.add_fix_xyz_coord(point, *self.bm.verts[point].co.xyz)
             added += 1
 
-        if existing > 0 and added == 0:
-            return self.warning(f"{existing} constraints already exist, so I did nothing...")
-
-        if existing > 0 and added > 0:
-            self.info(f"Added {added} constraints, {existing} already existing.")
-        else:
-            self.info(f"Added {added} constraints")
-        return {"FINISHED"}
+        return return_helper(self, existing, added)
 
 
 class MESH_CONSTRAINTS_OT_ConstraintParallel2Edges(ConstraintOperator):
