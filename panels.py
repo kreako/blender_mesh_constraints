@@ -124,7 +124,7 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
         box = self.layout.box()
         if len(mc) == 0:
             box.row(align=True).label(text="No constraints yet")
-        for index, c in enumerate(mc):
+        for index, c in enumerate(mc.reverse()):
             # TODO do something with ValueError ?
             c_kind = props.ConstraintsKind(c.kind)
             c_abbreviation = props.constraints_kind_abbreviation[c_kind]
