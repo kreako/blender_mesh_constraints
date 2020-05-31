@@ -96,6 +96,11 @@ class MeshConstraintsPanelAdd(MeshConstraintsPanelBase):
             "mesh_constraints.constraint_on_z",
             text=props.constraints_kind_abbreviation[props.ConstraintsKind.ON_Z],
         )
+        row = box.row()
+        row.operator(
+            "mesh_constraints.constraint_same_distance_2_edges",
+            text=props.constraints_kind_abbreviation[props.ConstraintsKind.SAME_DISTANCE],
+        )
 
 
 class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
@@ -184,6 +189,11 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                 elif c_kind == props.ConstraintsKind.ON_Z:
                     box.row(align=True).prop(c.raw, "point0", text="Point0")
                     box.row(align=True).prop(c.raw, "point1", text="Point1")
+                elif c_kind == props.ConstraintsKind.SAME_DISTANCE:
+                    box.row(align=True).prop(c.raw, "point0", text="Point0")
+                    box.row(align=True).prop(c.raw, "point1", text="Point1")
+                    box.row(align=True).prop(c.raw, "point2", text="Point2")
+                    box.row(align=True).prop(c.raw, "point3", text="Point3")
                 else:
                     raise Exception(f"Not supported: {c_display}")
                 row = box.row(align=True)
