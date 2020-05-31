@@ -1,3 +1,4 @@
+import math
 import gpu
 from gpu_extras.batch import batch_for_shader
 from bpy.types import WindowManager
@@ -255,6 +256,17 @@ def draw_constraints_definition(context):
             color = _select_color(c, equals(v0_3d.length, v1_3d.length))
             batch.add_edge_label((c.point0, c.point1), "/", color)
             batch.add_edge_label((c.point2, c.point3), "/", color)
+        elif c_kind == props.ConstraintsKind.ANGLE:
+            point0 = bm.verts[c.point0].co
+            point1 = bm.verts[c.point1].co
+            point2 = bm.verts[c.point2].co
+            point3 = bm.verts[c.point3].co
+            # dot product of v0 and v1 / (v0.length * v1.length) = cos(angle in radian)
+            v0_3d, v1_3d = point1 - point0, point3 - point2
+            cos_rad = v0_3d.dot(v1_3d) / (v0_3d.length * v1_3d.length)
+            color = _select_color(c, equals(cos_rad, math.cos(math.pi * c.angle / 180)))
+            batch.add_edge_label((c.point0, c.point1), f"{c.angle}°", color)
+            batch.add_edge_label((c.point2, c.point3), f"{c.angle}°", color)
         else:
             # Don't want to raise an error here but it deserves it
             pass
