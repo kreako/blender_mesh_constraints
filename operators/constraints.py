@@ -358,14 +358,14 @@ class MESH_CONSTRAINTS_OT_ConstraintOnY(ConstraintOperator):
     bl_idname = "mesh_constraints.constraint_on_y"
     bl_label = "Add an On Y constraint"
     bl_description = (
-        "Add a constraint to make an edge parallel to Y axis (select 2 vertices or 1 edge) (EDITMODE only)"
+        "Add a constraint to make an edge parallel to Y axis (select edges) (EDITMODE only)"
     )
 
     def constraint_execute(self, context):
         edges = self.selected_edges()
         if not edges:
             return self.warning(
-                "I need you to select at least on edge or I'm not able to add an On X constraint for edges"
+                "I need you to select at least on edge or I'm not able to add an On Y constraint for edges"
             )
         k = props.ConstraintsKind.ON_Y
         added = 0
