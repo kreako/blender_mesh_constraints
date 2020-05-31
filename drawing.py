@@ -311,7 +311,7 @@ def _format_distance(context, distance):
         if r >= 1.0:
             return f"{distance:.2f} m"
         elif r >= 0.1:
-            return f"{distance * 100:.2f} cm"
+            return f"{distance * 100:.1f} cm"
         elif r >= 0.01:
             return f"{distance * 100:.2f} cm"
         else:

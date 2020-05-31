@@ -16,7 +16,7 @@ def test_format_distance():
 
     context = Context(Scene(UnitSettings("METRIC")))
     assert _format_distance(context, 1.34567) == "1.35 m"
-    assert _format_distance(context, 0.34567) == "0.35 m"
+    assert _format_distance(context, 0.34567) == "34.6 cm"
     assert _format_distance(context, 0.034567) == "3.46 cm"
     assert _format_distance(context, 0.0034567) == "3.46 mm"
     assert _format_distance(context, 0.00034567) == "0.35 mm"
