@@ -26,6 +26,7 @@ class ConstraintsKind(Enum):
     ON_X = "11"
     ON_Y = "12"
     ON_Z = "13"
+    SAME_DISTANCE = "14"
 
 
 # For kind EnumProperty
@@ -55,6 +56,7 @@ constraints_kind_abbreviation = {
     ConstraintsKind.ON_X: "On X",
     ConstraintsKind.ON_Y: "On Y",
     ConstraintsKind.ON_Z: "On Z",
+    ConstraintsKind.SAME_DISTANCE: "Dist. =",
 }
 
 
@@ -157,6 +159,12 @@ class Constraint:
             self.data["point0"] = constraint_properties.point0
             self.data["point1"] = constraint_properties.point1
             self.nb_values = 0
+        elif self.kind == ConstraintsKind.SAME_DISTANCE:
+            self.data["point0"] = constraint_properties.point0
+            self.data["point1"] = constraint_properties.point1
+            self.data["point2"] = constraint_properties.point2
+            self.data["point3"] = constraint_properties.point3
+            self.nb_values = 0
         else:
             raise Exception(f"Unknown kind of constraints {self.kind}")
 
@@ -236,6 +244,7 @@ class MeshConstraints:
                 elif c_kind in (
                     ConstraintsKind.PARALLEL,
                     ConstraintsKind.PERPENDICULAR,
+                    ConstraintsKind.SAME_DISTANCE,
                 ):
                     point0 = kwargs["point0"]
                     point1 = kwargs["point1"]
@@ -404,3 +413,17 @@ class MeshConstraints:
         c.kind = ConstraintsKind.ON_Z.value
         c.point0 = point0
         c.point1 = point1
+
+    def add_same_distance(self, point0, point1, point2, point3):
+        """Add a ConstraintsKind::SAME_DISTANCE with parameters
+        point0: vertex index of 1st point of the 1st vector
+        point1: vertex index of 2nd point of the 1st vector
+        point2: vertex index of 1st point of the 2nd vector
+        point3: vertex index of 2nd point of the 2nd vector"""
+        c = self._add()
+        c.kind = ConstraintsKind.SAME_DISTANCE.value
+        c.point0 = point0
+        c.point1 = point1
+        c.point2 = point2
+        c.point3 = point3
+
