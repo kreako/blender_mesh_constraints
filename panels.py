@@ -141,35 +141,35 @@ class MeshConstraintsPanelItems(MeshConstraintsPanelBase):
                 row = box.row(align=True)
                 row.label(text=c_display)
                 if c_kind == props.ConstraintsKind.DISTANCE_BETWEEN_2_VERTICES:
+                    box.row(align=True).prop(c.raw, "value0", text="Distance")
                     box.row(align=True).prop(c.raw, "point0", text="Point0")
                     box.row(align=True).prop(c.raw, "point1", text="Point1")
-                    box.row(align=True).prop(c.raw, "value0", text="Distance")
                 elif c_kind == props.ConstraintsKind.FIX_X_COORD:
-                    box.row(align=True).prop(c.raw, "point0", text="Point")
                     box.row(align=True).prop(c.raw, "value0", text="X")
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
                 elif c_kind == props.ConstraintsKind.FIX_Y_COORD:
-                    box.row(align=True).prop(c.raw, "point0", text="Point")
                     box.row(align=True).prop(c.raw, "value0", text="Y")
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
                 elif c_kind == props.ConstraintsKind.FIX_Z_COORD:
-                    box.row(align=True).prop(c.raw, "point0", text="Point")
                     box.row(align=True).prop(c.raw, "value0", text="Z")
-                elif c_kind == props.ConstraintsKind.FIX_XY_COORD:
                     box.row(align=True).prop(c.raw, "point0", text="Point")
+                elif c_kind == props.ConstraintsKind.FIX_XY_COORD:
                     box.row(align=True).prop(c.raw, "value0", text="X")
                     box.row(align=True).prop(c.raw, "value1", text="Y")
-                elif c_kind == props.ConstraintsKind.FIX_XZ_COORD:
                     box.row(align=True).prop(c.raw, "point0", text="Point")
+                elif c_kind == props.ConstraintsKind.FIX_XZ_COORD:
                     box.row(align=True).prop(c.raw, "value0", text="X")
                     box.row(align=True).prop(c.raw, "value1", text="Z")
-                elif c_kind == props.ConstraintsKind.FIX_YZ_COORD:
                     box.row(align=True).prop(c.raw, "point0", text="Point")
+                elif c_kind == props.ConstraintsKind.FIX_YZ_COORD:
                     box.row(align=True).prop(c.raw, "value0", text="Y")
                     box.row(align=True).prop(c.raw, "value1", text="Z")
-                elif c_kind == props.ConstraintsKind.FIX_XYZ_COORD:
                     box.row(align=True).prop(c.raw, "point0", text="Point")
+                elif c_kind == props.ConstraintsKind.FIX_XYZ_COORD:
                     box.row(align=True).prop(c.raw, "value0", text="X")
                     box.row(align=True).prop(c.raw, "value1", text="Y")
                     box.row(align=True).prop(c.raw, "value2", text="Z")
+                    box.row(align=True).prop(c.raw, "point0", text="Point")
                 elif c_kind == props.ConstraintsKind.PARALLEL:
                     box.row(align=True).prop(c.raw, "point0", text="Point0")
                     box.row(align=True).prop(c.raw, "point1", text="Point1")
