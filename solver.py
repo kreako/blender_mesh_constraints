@@ -9,7 +9,7 @@ import math
 from mathutils import Vector
 
 
-sys.path.append("/home/noumir/.local/lib/python3.8/site-packages")
+# sys.path.append("<your-sympy-install-path>")
 from sympy import symbols, sqrt, diff, cos
 from sympy.matrices import Matrix
 import mpmath
